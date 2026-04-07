@@ -1,0 +1,6 @@
+export { Scene } from './Scene'
+export { FloatingGeometry } from './FloatingGeometry'
+export { ParticleSystem } from './ParticleSystem'
+export { OptimizedParticles } from './OptimizedParticles'
+export { ShieldModel } from './ShieldModel'
+export { MouseParallax } from './MouseParallax'
