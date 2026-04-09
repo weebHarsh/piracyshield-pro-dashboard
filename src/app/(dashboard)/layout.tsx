@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/stores/appStore';
 import { Sidebar, Header } from '@/components/layout';
@@ -14,6 +14,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const isAuthenticated = useAppStore((state) => state.isAuthenticated);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -35,11 +36,14 @@ export default function DashboardLayout({
           Skip to main content
         </a>
 
-        <Sidebar />
-        
-        <div className="ml-60">
-          <Header />
-          
+        <Sidebar
+          mobileOpen={mobileSidebarOpen}
+          onMobileClose={() => setMobileSidebarOpen(false)}
+        />
+
+        <div className="md:ml-60">
+          <Header onMobileMenuToggle={() => setMobileSidebarOpen(true)} />
+
           <main
             id="main-content"
             role="main"

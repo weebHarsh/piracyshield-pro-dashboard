@@ -69,7 +69,11 @@ const navigationItems: NavItem[] = [
   },
 ];
 
-export function Navigation() {
+interface NavigationProps {
+  onItemClick?: () => void;
+}
+
+export function Navigation({ onItemClick }: NavigationProps = {}) {
   const pathname = usePathname();
   const currentTab = useAppStore((state) => state.currentTab);
   const setCurrentTab = useAppStore((state) => state.setCurrentTab);
@@ -97,7 +101,7 @@ export function Navigation() {
             <Link
               key={item.id}
               href={routeMap[item.id]}
-              onClick={() => setCurrentTab(item.id)}
+              onClick={() => { setCurrentTab(item.id); onItemClick?.(); }}
               className={`
                 group flex items-center gap-3 px-3 py-2.5 rounded-lg
                 font-medium text-sm transition-all duration-200

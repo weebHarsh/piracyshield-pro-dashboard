@@ -1,6 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, Reorder } from 'framer-motion';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { LineChart, PieChart, BarChart, DonutChart } from '@/components/charts/Charts';
 import type { KPIData } from '@/types';
@@ -55,7 +56,28 @@ const activityIconColors: Record<string, string> = {
   bulk: 'bg-teal-100 text-teal-600',
 };
 
+const STORAGE_KEY = 'piracyshield-kpi-order';
+
 export default function DashboardOverviewPage() {
+  const [kpiOrder, setKpiOrder] = useState<KPIData[]>(() => {
+    if (typeof window === 'undefined') return kpiData;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const savedTitles: string[] = JSON.parse(saved);
+        const reordered = savedTitles
+          .map((title) => kpiData.find((k) => k.title === title))
+          .filter(Boolean) as KPIData[];
+        return reordered.length === kpiData.length ? reordered : kpiData;
+      }
+    } catch {}
+    return kpiData;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(kpiOrder.map((k) => k.title)));
+  }, [kpiOrder]);
+
   return (
     <div className="space-y-6">
       <motion.div
@@ -67,12 +89,20 @@ export default function DashboardOverviewPage() {
         <p className="text-slate-600 mt-1">Real-time piracy detection and takedown status</p>
       </motion.div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {kpiData.map((kpi, index) => (
-          <KPICard key={kpi.title} data={kpi} index={index} />
+      {/* KPI Cards — draggable */}
+      <Reorder.Group
+        axis="x"
+        values={kpiOrder}
+        onReorder={setKpiOrder}
+        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"
+        as="div"
+      >
+        {kpiOrder.map((kpi, index) => (
+          <Reorder.Item key={kpi.title} value={kpi} as="div">
+            <KPICard data={kpi} index={index} />
+          </Reorder.Item>
         ))}
-      </div>
+      </Reorder.Group>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
