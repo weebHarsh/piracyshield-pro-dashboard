@@ -94,6 +94,30 @@ h1, h2, h3, h4, h5, h6 {
   outline-offset: 2px;
 }
 
+/* Hero dot grid background */
+.hero-dot-grid {
+  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Slow pulse for glow orbs */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.08); }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 6s ease-in-out infinite;
+}
+
+/* Card float */
+@keyframes card-float {
+  0%, 100% { transform: translateY(0px) rotateX(2deg) rotateY(-3deg); }
+  50%       { transform: translateY(-12px) rotateX(2deg) rotateY(-3deg); }
+}
+.animate-card-float {
+  animation: card-float 5s ease-in-out infinite;
+}
+
 /* Skip Link for Accessibility */
 .skip-link {
   position: absolute;
