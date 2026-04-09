@@ -13,9 +13,9 @@ const trustBadges = [
 ]
 
 const stats = [
-  { value: 15000, display: (n: number) => `${n.toLocaleString()}+`, label: 'Users Protected' },
-  { value: 95,    display: (n: number) => `${n}%`,                  label: 'Success Rate'   },
-  { value: 1000,  display: (n: number) => `${n.toLocaleString()}+`, label: 'Platforms'      },
+  { value: 1000, display: (n: number) => `${n.toLocaleString()}+`, label: 'Platforms Monitored' },
+  { value: 95,   display: (n: number) => `${n}%`,                  label: 'Takedown Success'    },
+  { value: 14,   display: (n: number) => `${n}-day`,               label: 'Free Trial'          },
 ]
 
 function AnimatedStat({
@@ -89,7 +89,7 @@ export function CTASection() {
             Ready to Protect Your Content?
           </h2>
           <p className="text-lg sm:text-xl text-white/85 max-w-2xl mx-auto mb-10">
-            Join 15,000+ creators who trust PiracyShield to monitor, detect, and eliminate piracy automatically.
+            Join thousands of creators and rights-holders who use PiracyShield to monitor, detect, and remove piracy automatically.
           </p>
 
           {/* Stats */}

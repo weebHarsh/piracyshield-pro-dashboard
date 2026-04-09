@@ -9,7 +9,7 @@ const testimonials = [
     name: 'Sarah Chen',
     role: 'Content Creator',
     company: 'TechReview Pro',
-    quote: 'PiracyShield found over 500 illegal streams of my course content in the first week. Within days, 95% were taken down. My revenue increased by 40%.',
+    quote: 'PiracyShield found hundreds of unauthorized copies of my course content in the first week and had most of them down within days. It\'s become a core part of how I protect my work.',
     initials: 'SC',
     rating: 5,
   },
@@ -36,7 +36,7 @@ const testimonials = [
     name: 'David Kim',
     role: 'Founder',
     company: 'EduTech Inc',
-    quote: 'The ROI is incredible. We estimated losing $200k annually to piracy. With PiracyShield we\'ve reduced that by over 80% in just three months.',
+    quote: 'We were losing significant revenue to piracy before PiracyShield. The difference in detected and removed content has been dramatic — highly recommended for any digital publisher.',
     initials: 'DK',
     rating: 4,
   },
@@ -148,7 +148,7 @@ export function TestimonialsCarousel() {
   const restWords = ['Worldwide']
 
   return (
-    <section id="testimonials" className="relative py-24 bg-[#0b1120]">
+    <section id="testimonials" className="relative py-24 bg-[#060d1a]">
       {/* Background orb */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/2 right-0 w-96 h-96 -translate-y-1/2 bg-purple-500/6 rounded-full blur-3xl" />

@@ -2,15 +2,17 @@
 
 import { useRef, useState } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { useCountUp } from '@/hooks'
+
+// ─── Tab definitions ────────────────────────────────────────────────────────
 
 const tabs = [
   {
     id: 'incidents',
     label: 'Incidents',
     icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
       </svg>
     ),
   },
@@ -18,8 +20,9 @@ const tabs = [
     id: 'takedowns',
     label: 'Takedowns',
     icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <polyline points="9 12 11 14 15 10"/>
       </svg>
     ),
   },
@@ -27,97 +30,224 @@ const tabs = [
     id: 'analytics',
     label: 'Analytics',
     icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
       </svg>
     ),
   },
 ]
 
-function StatCard({
-  value,
-  label,
-  color,
-  delay,
-  isActive,
-  suffix = '',
-  prefix = '',
-}: {
-  value: number
-  label: string
-  color: string
-  delay: number
-  isActive: boolean
-  suffix?: string
-  prefix?: string
-}) {
-  const count = useCountUp(value, 1500, isActive)
+// ─── Risk badge ──────────────────────────────────────────────────────────────
+
+const riskStyle: Record<string, { bg: string; text: string; label: string }> = {
+  critical: { bg: 'rgba(239,68,68,0.12)',  text: '#f87171', label: 'Critical' },
+  high:     { bg: 'rgba(249,115,22,0.12)', text: '#fb923c', label: 'High'     },
+  medium:   { bg: 'rgba(234,179,8,0.12)',  text: '#facc15', label: 'Medium'   },
+  low:      { bg: 'rgba(34,197,94,0.12)',  text: '#4ade80', label: 'Low'      },
+}
+
+function RiskBadge({ level }: { level: keyof typeof riskStyle }) {
+  const s = riskStyle[level]
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      transition={{ delay, duration: 0.4 }}
-      className={`rounded-xl p-5 border`}
-      style={{
-        background: `${color}12`,
-        borderColor: `${color}30`,
-      }}
+    <span
+      className="text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
+      style={{ background: s.bg, color: s.text, border: `1px solid ${s.text}30` }}
     >
-      <div className="text-3xl font-bold tabular-nums" style={{ color }}>
-        {prefix}{count.toLocaleString()}{suffix}
+      {s.label}
+    </span>
+  )
+}
+
+// ─── Incidents tab ───────────────────────────────────────────────────────────
+
+const incidents = [
+  { platform: 'YouTube',  initial: 'Y', color: '#ef4444', title: 'Full Movie — Unauthorized Upload',  risk: 'critical' as const, time: '2m ago',  status: 'Takedown sent' },
+  { platform: 'Telegram', initial: 'T', color: '#38bdf8', title: 'Paid Course Bundle Distributed',    risk: 'high'     as const, time: '8m ago',  status: 'Processing'    },
+  { platform: 'Reddit',   initial: 'R', color: '#fb923c', title: 'Ebook PDF Shared Publicly',         risk: 'medium'   as const, time: '19m ago', status: 'Detected'      },
+  { platform: 'Discord',  initial: 'D', color: '#818cf8', title: 'Screen Recording Clip — No License',risk: 'low'      as const, time: '1h ago',  status: 'Monitoring'    },
+]
+
+function IncidentsTab() {
+  return (
+    <div>
+      {/* Summary strip */}
+      <div className="flex items-center gap-6 mb-4 px-1">
+        {[
+          { label: 'Critical', value: '12', color: '#f87171' },
+          { label: 'High',     value: '48', color: '#fb923c' },
+          { label: 'Total',    value: '2,847', color: '#94a3b8' },
+        ].map((s) => (
+          <div key={s.label} className="flex items-center gap-1.5">
+            <span className="text-sm font-bold tabular-nums" style={{ color: s.color }}>{s.value}</span>
+            <span className="text-xs text-gray-500">{s.label}</span>
+          </div>
+        ))}
+        <div className="ml-auto flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
+          <span className="text-xs text-teal-400">Live</span>
+        </div>
       </div>
-      <div className="text-sm text-gray-400 mt-1">{label}</div>
-    </motion.div>
-  )
-}
 
-function IncidentsTab({ isActive }: { isActive: boolean }) {
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <StatCard value={12}   label="Critical"        color="#ef4444" delay={0}    isActive={isActive} />
-      <StatCard value={48}   label="High Priority"   color="#f97316" delay={0.1}  isActive={isActive} />
-      <StatCard value={156}  label="Medium"          color="#eab308" delay={0.2}  isActive={isActive} />
-      <StatCard value={2847} label="Total Incidents" color="#14b8a6" delay={0.3}  isActive={isActive} />
+      {/* Incident rows */}
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
+      >
+        {incidents.map((inc, i) => (
+          <div
+            key={inc.title}
+            className={`flex items-center gap-3 px-4 py-3 ${i < incidents.length - 1 ? 'border-b' : ''}`}
+            style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+          >
+            <div
+              className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-[11px] font-bold"
+              style={{ background: `${inc.color}15`, border: `1px solid ${inc.color}30`, color: inc.color }}
+            >
+              {inc.initial}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs text-gray-200 font-medium truncate">{inc.title}</div>
+              <div className="text-[10px] text-gray-500 mt-0.5">{inc.platform} · {inc.time}</div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="text-[10px] text-gray-500 hidden sm:block">{inc.status}</span>
+              <RiskBadge level={inc.risk} />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
 
-function TakedownsTab({ isActive }: { isActive: boolean }) {
+// ─── Takedowns tab ───────────────────────────────────────────────────────────
+
+const takedowns = [
+  { platform: 'YouTube',     count: 847,   resolved: 812,  pending: 35  },
+  { platform: 'Telegram',    count: 621,   resolved: 589,  pending: 32  },
+  { platform: 'Reddit',      count: 412,   resolved: 401,  pending: 11  },
+  { platform: 'Twitter/X',   count: 298,   resolved: 271,  pending: 27  },
+]
+
+function TakedownsTab() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <StatCard value={234}   label="Pending Requests" color="#eab308" delay={0}   isActive={isActive} />
-      <StatCard value={12453} label="Completed"        color="#22c55e" delay={0.1} isActive={isActive} />
-      <StatCard value={95}    label="Success Rate"     color="#14b8a6" delay={0.2} isActive={isActive} suffix="%" />
+    <div>
+      <div className="flex items-center gap-6 mb-4 px-1">
+        {[
+          { label: 'Total filed',   value: '12,453', color: '#94a3b8' },
+          { label: 'Success rate',  value: '95%',    color: '#34d399' },
+          { label: 'Pending',       value: '234',    color: '#facc15' },
+        ].map((s) => (
+          <div key={s.label} className="flex items-center gap-1.5">
+            <span className="text-sm font-bold tabular-nums" style={{ color: s.color }}>{s.value}</span>
+            <span className="text-xs text-gray-500">{s.label}</span>
+          </div>
+        ))}
+      </div>
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
+      >
+        {takedowns.map((t, i) => {
+          const pct = Math.round((t.resolved / t.count) * 100)
+          return (
+            <div
+              key={t.platform}
+              className={`px-4 py-3 ${i < takedowns.length - 1 ? 'border-b' : ''}`}
+              style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+            >
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs text-gray-300 font-medium">{t.platform}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] text-gray-500">{t.resolved.toLocaleString()} resolved</span>
+                  <span className="text-xs font-semibold text-teal-400">{pct}%</span>
+                </div>
+              </div>
+              <div className="h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ duration: 1, delay: i * 0.1, ease: 'easeOut' }}
+                  className="h-full rounded-full"
+                  style={{ background: 'linear-gradient(90deg, #14b8a6, #06b6d4)' }}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
 
-function AnalyticsTab({ isActive }: { isActive: boolean }) {
+// ─── Analytics tab ───────────────────────────────────────────────────────────
+
+const platformStats = [
+  { name: 'YouTube',   incidents: 847,  share: 33 },
+  { name: 'Telegram',  incidents: 621,  share: 24 },
+  { name: 'Reddit',    incidents: 412,  share: 16 },
+  { name: 'Twitter',   incidents: 298,  share: 12 },
+  { name: 'Discord',   incidents: 203,  share: 8  },
+]
+
+function AnalyticsTab() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <StatCard value={1247} label="Platforms Monitored" color="#a78bfa" delay={0}   isActive={isActive} />
-      <StatCard value={89}   label="Countries Protected" color="#60a5fa" delay={0.1} isActive={isActive} />
-      <StatCard value={125}  label="Weekly Growth"       color="#14b8a6" delay={0.2} isActive={isActive} prefix="+" suffix="%" />
+    <div>
+      <div className="flex items-center gap-6 mb-4 px-1">
+        {[
+          { label: 'Platforms',  value: '1,247', color: '#818cf8' },
+          { label: 'Countries',  value: '89',    color: '#38bdf8' },
+          { label: 'This week',  value: '+12%',  color: '#34d399' },
+        ].map((s) => (
+          <div key={s.label} className="flex items-center gap-1.5">
+            <span className="text-sm font-bold tabular-nums" style={{ color: s.color }}>{s.value}</span>
+            <span className="text-xs text-gray-500">{s.label}</span>
+          </div>
+        ))}
+      </div>
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
+      >
+        {platformStats.map((p, i) => (
+          <div
+            key={p.name}
+            className={`flex items-center gap-3 px-4 py-3 ${i < platformStats.length - 1 ? 'border-b' : ''}`}
+            style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+          >
+            <span className="text-xs text-gray-400 w-16 flex-shrink-0">{p.name}</span>
+            <div className="flex-1 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }}>
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${p.share * 3}%` }}
+                transition={{ duration: 0.9, delay: i * 0.08, ease: 'easeOut' }}
+                className="h-full rounded-full"
+                style={{ background: 'linear-gradient(90deg, #818cf8, #14b8a6)' }}
+              />
+            </div>
+            <span className="text-xs text-gray-500 w-12 text-right tabular-nums">{p.incidents.toLocaleString()}</span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
+
+// ─── Main component ──────────────────────────────────────────────────────────
 
 export function LiveDemo() {
   const sectionRef = useRef<HTMLElement>(null)
-  const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
-  const [activeTab, setActiveTab] = useState('incidents')
-  const titleRef = useRef<HTMLDivElement>(null)
+  const isInView   = useInView(sectionRef, { once: true, margin: '-100px' })
+  const titleRef   = useRef<HTMLDivElement>(null)
   const isTitleInView = useInView(titleRef, { once: true, margin: '-80px' })
-
-  const headingWords = ['See', 'PiracyShield']
-  const gradientWords = ['In', 'Action']
+  const [activeTab, setActiveTab] = useState('incidents')
 
   return (
     <section ref={sectionRef} id="demo" className="relative py-24 bg-[#060d1a]">
       {/* Cyan glow accent */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 right-1/4 w-96 h-96 -translate-y-1/2 bg-cyan-500/6 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-0 w-[500px] h-[500px] -translate-y-1/2 bg-cyan-500/5 rounded-full blur-3xl" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -131,93 +261,65 @@ export function LiveDemo() {
           >
             Live Dashboard Preview
           </motion.p>
-
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            {headingWords.map((word, i) => (
-              <motion.span
-                key={word}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isTitleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.1 + i * 0.04 }}
-                className="inline-block mr-2"
-              >
-                {word}
-              </motion.span>
+            {['See', 'PiracyShield'].map((w, i) => (
+              <motion.span key={w} initial={{ opacity: 0, y: 20 }} animate={isTitleInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.1 + i * 0.05 }} className="inline-block mr-2">{w}</motion.span>
             ))}
-            {gradientWords.map((word, i) => (
-              <motion.span
-                key={word}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isTitleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.18 + i * 0.04 }}
-                className="inline-block mr-2 bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent"
-              >
-                {word}
-              </motion.span>
+            {['In', 'Action'].map((w, i) => (
+              <motion.span key={w} initial={{ opacity: 0, y: 20 }} animate={isTitleInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 + i * 0.05 }} className="inline-block mr-2 bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">{w}</motion.span>
             ))}
           </h2>
-
           <motion.p
             initial={{ opacity: 0, y: 16 }}
-            animate={isTitleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            animate={isTitleInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-lg text-gray-400 max-w-2xl mx-auto"
+            className="text-gray-400 max-w-2xl mx-auto"
           >
-            Explore our powerful dashboard with real-time monitoring and automated takedowns.
+            A glimpse into the dashboard used by content teams to monitor and act on piracy daily.
           </motion.p>
         </div>
 
         {/* Browser window */}
         <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative rounded-2xl shadow-2xl overflow-hidden"
-          style={{
-            border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(9,15,28,0.95)',
-          }}
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="rounded-2xl overflow-hidden shadow-2xl"
+          style={{ border: '1px solid rgba(255,255,255,0.09)', background: 'rgba(9,15,28,0.98)' }}
         >
           {/* Browser chrome */}
-          <div
-            className="flex items-center gap-2 px-4 py-3 border-b"
-            style={{ background: 'rgba(15,23,42,0.95)', borderColor: 'rgba(255,255,255,0.08)' }}
-          >
+          <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ background: 'rgba(15,23,42,0.98)', borderColor: 'rgba(255,255,255,0.07)' }}>
             <div className="flex gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-red-500/80" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-              <div className="w-3 h-3 rounded-full bg-green-500/80" />
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
             </div>
             <div className="flex-1 mx-4">
-              <div
-                className="rounded-md px-3 py-1 text-xs text-gray-400 text-center overflow-hidden"
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
-              >
-                <span className="inline-block overflow-hidden whitespace-nowrap"
-                  style={{
-                    animation: isInView ? 'typing 1.2s steps(32, end) 0.6s both' : 'none',
-                    width: isInView ? undefined : 0,
-                  }}>
-                  app.piracyshield.pro/dashboard
-                </span>
+              <div className="rounded-md px-3 py-1 text-xs text-gray-500 text-center" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                app.piracyshield.pro/dashboard
               </div>
             </div>
           </div>
 
-          {/* Dashboard content */}
-          <div className="p-6">
+          {/* Dashboard body */}
+          <div className="p-5 sm:p-6">
             {/* Tabs */}
-            <div className="flex gap-3 mb-6 flex-wrap">
+            <div className="flex gap-2 mb-5">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium transition-all ${
                     activeTab === tab.id
-                      ? 'bg-teal-500/15 text-teal-400 border border-teal-500/40'
-                      : 'text-gray-400 border border-white/[0.08] hover:border-white/20 hover:text-gray-300'
+                      ? 'bg-teal-500/15 text-teal-400'
+                      : 'text-gray-500 hover:text-gray-300'
                   }`}
-                  style={{ background: activeTab === tab.id ? undefined : 'rgba(255,255,255,0.03)' }}
+                  style={{
+                    border: activeTab === tab.id
+                      ? '1px solid rgba(20,184,166,0.35)'
+                      : '1px solid rgba(255,255,255,0.07)',
+                    background: activeTab !== tab.id ? 'rgba(255,255,255,0.02)' : undefined,
+                  }}
                 >
                   {tab.icon}
                   {tab.label}
@@ -225,18 +327,18 @@ export function LiveDemo() {
               ))}
             </div>
 
-            {/* Tab content — crossfades */}
+            {/* Tab content */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.2 }}
               >
-                {activeTab === 'incidents'  && <IncidentsTab  isActive={isInView} />}
-                {activeTab === 'takedowns'  && <TakedownsTab  isActive={isInView} />}
-                {activeTab === 'analytics'  && <AnalyticsTab  isActive={isInView} />}
+                {activeTab === 'incidents' && <IncidentsTab />}
+                {activeTab === 'takedowns' && <TakedownsTab />}
+                {activeTab === 'analytics' && <AnalyticsTab />}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -252,11 +354,11 @@ export function LiveDemo() {
         >
           <a
             href="/signup"
-            className="inline-flex items-center px-6 py-3 font-semibold text-white rounded-xl transition-all border border-white/20 hover:border-white/40 hover:bg-white/[0.06]"
-            style={{ background: 'rgba(255,255,255,0.06)' }}
+            className="inline-flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-xl transition-all"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
           >
-            Try Interactive Demo
-            <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            Try the Full Dashboard
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
           </a>

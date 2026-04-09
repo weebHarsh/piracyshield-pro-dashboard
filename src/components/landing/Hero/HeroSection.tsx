@@ -84,7 +84,7 @@ export function HeroSection() {
   return (
     <section
       ref={inViewRef}
-      className="relative min-h-screen bg-[#060d1a] flex items-center overflow-hidden"
+      className="relative bg-[#060d1a] overflow-hidden"
     >
       {/* Background layers */}
       <div className="absolute inset-0 hero-dot-grid opacity-60" />
@@ -99,8 +99,8 @@ export function HeroSection() {
       {(!ready || tier === 2) && <GlowBackground />}
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-0">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-screen lg:py-20">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
           {/* Left column: text */}
           <div className="flex flex-col items-start">
@@ -126,7 +126,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-5xl sm:text-6xl lg:text-[4.5rem] font-bold text-white leading-[1.08] tracking-tight mb-6"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6"
             >
               Detect Piracy.
               <br />

@@ -59,18 +59,25 @@ const pricingTiers = [
 ]
 
 function PriceDisplay({ price, yearly }: { price: number | null; yearly: boolean }) {
+  // Fixed outer container height so all three cards align
   if (price === null) {
     return (
-      <div className="flex items-baseline gap-2 h-12">
-        <span className="text-4xl font-bold text-white">Custom</span>
+      <div className="h-14 flex flex-col justify-center">
+        <div className="flex items-baseline gap-2">
+          <span className="text-4xl font-bold text-white">Custom</span>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">Tailored to your scale</p>
       </div>
     )
   }
   if (price === 0) {
     return (
-      <div className="flex items-baseline gap-2 h-12">
-        <span className="text-4xl font-bold text-white">$0</span>
-        <span className="text-gray-400">/forever</span>
+      <div className="h-14 flex flex-col justify-center">
+        <div className="flex items-baseline gap-2">
+          <span className="text-4xl font-bold text-white">$0</span>
+          <span className="text-gray-500 text-sm">/month</span>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">Free forever, no card needed</p>
       </div>
     )
   }
@@ -80,23 +87,27 @@ function PriceDisplay({ price, yearly }: { price: number | null; yearly: boolean
   const shown          = yearly ? yearlyDisplay : monthlyDisplay
 
   return (
-    <div className="h-12 flex items-baseline gap-2 overflow-hidden">
-      <AnimatePresence mode="wait">
-        <motion.span
-          key={`${shown}-price`}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -16 }}
-          transition={{ duration: 0.22 }}
-          className="text-4xl font-bold text-white tabular-nums"
-        >
-          ${shown}
-        </motion.span>
-      </AnimatePresence>
-      <span className="text-gray-400">/mo</span>
-      {yearly && (
-        <span className="line-through text-gray-500 text-sm">${monthlyDisplay}</span>
-      )}
+    <div className="h-14 flex flex-col justify-center overflow-hidden">
+      <div className="flex items-baseline gap-2">
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={`${shown}-price`}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -14 }}
+            transition={{ duration: 0.22 }}
+            className="text-4xl font-bold text-white tabular-nums"
+          >
+            ${shown}
+          </motion.span>
+        </AnimatePresence>
+        <span className="text-gray-500 text-sm">/month</span>
+        {yearly && <span className="line-through text-gray-600 text-sm">${monthlyDisplay}</span>}
+      </div>
+      {yearly
+        ? <p className="text-xs text-teal-400 mt-1">Billed annually — 20% off</p>
+        : <p className="text-xs text-gray-600 mt-1">Billed monthly</p>
+      }
     </div>
   )
 }
@@ -123,7 +134,7 @@ function PricingCard({
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
       transition={{ duration: 0.55, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
       whileHover={{ y: -8, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
-      className={`relative ${tier.popular ? 'lg:-mt-4' : ''}`}
+      className="relative"
     >
       {/* Popular badge */}
       {tier.popular && (
