@@ -29,8 +29,8 @@ export function MouseParallax({ children, factor = 0.5 }: MouseParallaxProps) {
       }
     }
     
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('touchmove', handleTouchMove)
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    window.addEventListener('touchmove', handleTouchMove, { passive: true })
     
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)

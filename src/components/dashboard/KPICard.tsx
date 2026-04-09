@@ -62,7 +62,7 @@ export function KPICard({ data, index }: KPICardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.3 }}
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      whileHover={{ y: -8, transition: { duration: 0.2 } }}
       className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 cursor-pointer hover:shadow-lg hover:border-teal-200 transition-all duration-200"
       role="article"
       aria-label={`${data.title}: ${data.value}`}

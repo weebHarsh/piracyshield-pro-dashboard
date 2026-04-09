@@ -75,7 +75,7 @@ export function Navigation() {
   const setCurrentTab = useAppStore((state) => state.setCurrentTab);
 
   const routeMap: Record<TabId, string> = {
-    dashboard: '/dashboard',
+    dashboard: '/overview',
     incidents: '/incidents',
     takedowns: '/takedowns',
     content: '/content',

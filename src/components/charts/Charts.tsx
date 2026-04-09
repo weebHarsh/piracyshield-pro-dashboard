@@ -24,13 +24,18 @@ export function useChart<T extends HTMLElement>(option: EChartsOption, deps: Rea
 
     chartInstance.current.setOption(option);
 
+    let resizeTimer: ReturnType<typeof setTimeout>;
     const handleResize = () => {
-      chartInstance.current?.resize();
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        chartInstance.current?.resize();
+      }, 200);
     };
 
     window.addEventListener('resize', handleResize);
 
     return () => {
+      clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
       chartInstance.current?.dispose();
       chartInstance.current = null;

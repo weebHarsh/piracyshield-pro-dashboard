@@ -37,7 +37,7 @@ export default function DashboardLayout({
 
         <Sidebar />
         
-        <div className="ml-64">
+        <div className="ml-60">
           <Header />
           
           <main

@@ -44,9 +44,7 @@ export function Modal({
 }: ModalProps) {
   const modalRef = useFocusTrap<HTMLDivElement>(isOpen);
   const titleId = useRef(`modal-title-${Math.random().toString(36).substr(2, 9)}`);
-  const descriptionId = description
-    ? useRef(`modal-desc-${Math.random().toString(36).substr(2, 9)}`)
-    : undefined;
+  const descriptionId = useRef(`modal-desc-${Math.random().toString(36).substr(2, 9)}`);
 
   useEscapeKey(onClose, isOpen);
   useScrollLock(isOpen);
@@ -84,7 +82,7 @@ export function Modal({
           role="dialog"
           aria-modal="true"
           aria-labelledby={ariaLabelledBy || titleId.current}
-          aria-describedby={ariaDescribedBy || descriptionId?.current}
+          aria-describedby={ariaDescribedBy || (description ? descriptionId.current : undefined)}
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -119,7 +117,7 @@ export function Modal({
                   </h2>
                   {description && (
                     <p
-                      id={ariaDescribedBy || descriptionId?.current}
+                      id={ariaDescribedBy || descriptionId.current}
                       className="mt-1 text-sm text-slate-600"
                     >
                       {description}
