@@ -8,3 +8,5 @@ export {
   useMediaQuery,
   useInView,
 } from './useScrollAnimation'
+
+export { useCountUp } from './useCountUp'

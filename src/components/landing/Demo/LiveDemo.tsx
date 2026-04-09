@@ -1,205 +1,247 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { useCountUp } from '@/hooks'
+
+const tabs = [
+  {
+    id: 'incidents',
+    label: 'Incidents',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'takedowns',
+    label: 'Takedowns',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'analytics',
+    label: 'Analytics',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    ),
+  },
+]
+
+function StatCard({
+  value,
+  label,
+  color,
+  delay,
+  isActive,
+  suffix = '',
+  prefix = '',
+}: {
+  value: number
+  label: string
+  color: string
+  delay: number
+  isActive: boolean
+  suffix?: string
+  prefix?: string
+}) {
+  const count = useCountUp(value, 1500, isActive)
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      transition={{ delay, duration: 0.4 }}
+      className={`rounded-xl p-5 border`}
+      style={{
+        background: `${color}12`,
+        borderColor: `${color}30`,
+      }}
+    >
+      <div className="text-3xl font-bold tabular-nums" style={{ color }}>
+        {prefix}{count.toLocaleString()}{suffix}
+      </div>
+      <div className="text-sm text-gray-400 mt-1">{label}</div>
+    </motion.div>
+  )
+}
+
+function IncidentsTab({ isActive }: { isActive: boolean }) {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <StatCard value={12}   label="Critical"        color="#ef4444" delay={0}    isActive={isActive} />
+      <StatCard value={48}   label="High Priority"   color="#f97316" delay={0.1}  isActive={isActive} />
+      <StatCard value={156}  label="Medium"          color="#eab308" delay={0.2}  isActive={isActive} />
+      <StatCard value={2847} label="Total Incidents" color="#14b8a6" delay={0.3}  isActive={isActive} />
+    </div>
+  )
+}
+
+function TakedownsTab({ isActive }: { isActive: boolean }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <StatCard value={234}   label="Pending Requests" color="#eab308" delay={0}   isActive={isActive} />
+      <StatCard value={12453} label="Completed"        color="#22c55e" delay={0.1} isActive={isActive} />
+      <StatCard value={95}    label="Success Rate"     color="#14b8a6" delay={0.2} isActive={isActive} suffix="%" />
+    </div>
+  )
+}
+
+function AnalyticsTab({ isActive }: { isActive: boolean }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <StatCard value={1247} label="Platforms Monitored" color="#a78bfa" delay={0}   isActive={isActive} />
+      <StatCard value={89}   label="Countries Protected" color="#60a5fa" delay={0.1} isActive={isActive} />
+      <StatCard value={125}  label="Weekly Growth"       color="#14b8a6" delay={0.2} isActive={isActive} prefix="+" suffix="%" />
+    </div>
+  )
+}
 
 export function LiveDemo() {
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
   const [activeTab, setActiveTab] = useState('incidents')
-  
-  const tabs = [
-    { id: 'incidents', label: 'Incidents', icon: '⚠️' },
-    { id: 'takedowns', label: 'Takedowns', icon: '🎯' },
-    { id: 'analytics', label: 'Analytics', icon: '📊' },
-  ]
-  
-  const mockData = {
-    incidents: {
-      critical: 12,
-      high: 48,
-      medium: 156,
-      total: 2847,
-    },
-    takedowns: {
-      pending: 234,
-      completed: 12453,
-      success: 95,
-    },
-    analytics: {
-      platforms: 1247,
-      countries: 89,
-      weeklyGrowth: 12.5,
-    },
-  }
-  
+  const titleRef = useRef<HTMLDivElement>(null)
+  const isTitleInView = useInView(titleRef, { once: true, margin: '-80px' })
+
+  const headingWords = ['See', 'PiracyShield']
+  const gradientWords = ['In', 'Action']
+
   return (
-    <section ref={sectionRef} id="demo" className="relative py-24 bg-gradient-to-b from-gray-900 to-gray-800">
+    <section ref={sectionRef} id="demo" className="relative py-24 bg-[#060d1a]">
+      {/* Cyan glow accent */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/2 right-1/4 w-96 h-96 -translate-y-1/2 bg-cyan-500/6 rounded-full blur-3xl" />
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section title */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
+        <div ref={titleRef} className="text-center mb-12">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={isTitleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+            transition={{ duration: 0.4 }}
+            className="text-teal-400 text-xs font-semibold uppercase tracking-widest mb-4"
+          >
+            Live Dashboard Preview
+          </motion.p>
+
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            See PiracyShield{' '}
-            <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
-              In Action
-            </span>
+            {headingWords.map((word, i) => (
+              <motion.span
+                key={word}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isTitleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.1 + i * 0.04 }}
+                className="inline-block mr-2"
+              >
+                {word}
+              </motion.span>
+            ))}
+            {gradientWords.map((word, i) => (
+              <motion.span
+                key={word}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isTitleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.18 + i * 0.04 }}
+                className="inline-block mr-2 bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent"
+              >
+                {word}
+              </motion.span>
+            ))}
           </h2>
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={isTitleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="text-lg text-gray-400 max-w-2xl mx-auto"
+          >
             Explore our powerful dashboard with real-time monitoring and automated takedowns.
-          </p>
-        </motion.div>
-        
-        {/* Demo preview container */}
+          </motion.p>
+        </div>
+
+        {/* Browser window */}
         <motion.div
-          initial={{ opacity: 0, y: 50, scale: 0.95 }}
-          animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 50, scale: 0.95 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-700"
+          initial={{ opacity: 0, y: 60 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="relative rounded-2xl shadow-2xl overflow-hidden"
+          style={{
+            border: '1px solid rgba(255,255,255,0.1)',
+            background: 'rgba(9,15,28,0.95)',
+          }}
         >
           {/* Browser chrome */}
-          <div className="flex items-center gap-2 px-4 py-3 bg-gray-800 border-b border-gray-700">
+          <div
+            className="flex items-center gap-2 px-4 py-3 border-b"
+            style={{ background: 'rgba(15,23,42,0.95)', borderColor: 'rgba(255,255,255,0.08)' }}
+          >
             <div className="flex gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-red-500" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500" />
-              <div className="w-3 h-3 rounded-full bg-green-500" />
+              <div className="w-3 h-3 rounded-full bg-red-500/80" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+              <div className="w-3 h-3 rounded-full bg-green-500/80" />
             </div>
             <div className="flex-1 mx-4">
-              <div className="bg-gray-700 rounded-md px-3 py-1 text-xs text-gray-400 text-center">
-                piracyshield.pro/dashboard
+              <div
+                className="rounded-md px-3 py-1 text-xs text-gray-400 text-center overflow-hidden"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
+              >
+                <span className="inline-block overflow-hidden whitespace-nowrap"
+                  style={{
+                    animation: isInView ? 'typing 1.2s steps(32, end) 0.6s both' : 'none',
+                    width: isInView ? undefined : 0,
+                  }}>
+                  app.piracyshield.pro/dashboard
+                </span>
               </div>
             </div>
           </div>
-          
+
           {/* Dashboard content */}
-          <div className="p-6 bg-gray-900">
+          <div className="p-6">
             {/* Tabs */}
-            <div className="flex gap-4 mb-6">
+            <div className="flex gap-3 mb-6 flex-wrap">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                     activeTab === tab.id
-                      ? 'bg-teal-500/20 text-teal-400 border border-teal-500/50'
-                      : 'bg-gray-800 text-gray-400 border border-gray-700 hover:border-gray-600'
+                      ? 'bg-teal-500/15 text-teal-400 border border-teal-500/40'
+                      : 'text-gray-400 border border-white/[0.08] hover:border-white/20 hover:text-gray-300'
                   }`}
+                  style={{ background: activeTab === tab.id ? undefined : 'rgba(255,255,255,0.03)' }}
                 >
-                  <span className="mr-2">{tab.icon}</span>
+                  {tab.icon}
                   {tab.label}
                 </button>
               ))}
             </div>
-            
-            {/* Content based on active tab */}
-            {activeTab === 'incidents' && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="bg-gradient-to-br from-red-500/10 to-red-600/10 rounded-xl p-4 border border-red-500/20"
-                >
-                  <div className="text-3xl font-bold text-red-400">{mockData.incidents.critical}</div>
-                  <div className="text-sm text-gray-400 mt-1">Critical</div>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 rounded-xl p-4 border border-orange-500/20"
-                >
-                  <div className="text-3xl font-bold text-orange-400">{mockData.incidents.high}</div>
-                  <div className="text-sm text-gray-400 mt-1">High Priority</div>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 rounded-xl p-4 border border-yellow-500/20"
-                >
-                  <div className="text-3xl font-bold text-yellow-400">{mockData.incidents.medium}</div>
-                  <div className="text-sm text-gray-400 mt-1">Medium</div>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="bg-gradient-to-br from-teal-500/10 to-teal-600/10 rounded-xl p-4 border border-teal-500/20"
-                >
-                  <div className="text-3xl font-bold text-teal-400">{mockData.incidents.total.toLocaleString()}</div>
-                  <div className="text-sm text-gray-400 mt-1">Total Incidents</div>
-                </motion.div>
-              </div>
-            )}
-            
-            {activeTab === 'takedowns' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 rounded-xl p-6 border border-yellow-500/20"
-                >
-                  <div className="text-4xl font-bold text-yellow-400">{mockData.takedowns.pending}</div>
-                  <div className="text-sm text-gray-400 mt-1">Pending Requests</div>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="bg-gradient-to-br from-green-500/10 to-green-600/10 rounded-xl p-6 border border-green-500/20"
-                >
-                  <div className="text-4xl font-bold text-green-400">{mockData.takedowns.completed.toLocaleString()}</div>
-                  <div className="text-sm text-gray-400 mt-1">Completed</div>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="bg-gradient-to-br from-teal-500/10 to-teal-600/10 rounded-xl p-6 border border-teal-500/20"
-                >
-                  <div className="text-4xl font-bold text-teal-400">{mockData.takedowns.success}%</div>
-                  <div className="text-sm text-gray-400 mt-1">Success Rate</div>
-                </motion.div>
-              </div>
-            )}
-            
-            {activeTab === 'analytics' && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-xl p-6 border border-purple-500/20"
-                >
-                  <div className="text-4xl font-bold text-purple-400">{mockData.analytics.platforms.toLocaleString()}</div>
-                  <div className="text-sm text-gray-400 mt-1">Platforms Monitored</div>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-xl p-6 border border-blue-500/20"
-                >
-                  <div className="text-4xl font-bold text-blue-400">{mockData.analytics.countries}</div>
-                  <div className="text-sm text-gray-400 mt-1">Countries Protected</div>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="bg-gradient-to-br from-teal-500/10 to-teal-600/10 rounded-xl p-6 border border-teal-500/20"
-                >
-                  <div className="text-4xl font-bold text-teal-400">+{mockData.analytics.weeklyGrowth}%</div>
-                  <div className="text-sm text-gray-400 mt-1">Weekly Growth</div>
-                </motion.div>
-              </div>
-            )}
+
+            {/* Tab content — crossfades */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+              >
+                {activeTab === 'incidents'  && <IncidentsTab  isActive={isInView} />}
+                {activeTab === 'takedowns'  && <TakedownsTab  isActive={isInView} />}
+                {activeTab === 'analytics'  && <AnalyticsTab  isActive={isInView} />}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </motion.div>
-        
+
         {/* CTA */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -210,7 +252,8 @@ export function LiveDemo() {
         >
           <a
             href="/signup"
-            className="inline-flex items-center px-6 py-3 bg-white/10 text-white font-semibold rounded-lg hover:bg-white/20 transition-all border border-white/20"
+            className="inline-flex items-center px-6 py-3 font-semibold text-white rounded-xl transition-all border border-white/20 hover:border-white/40 hover:bg-white/[0.06]"
+            style={{ background: 'rgba(255,255,255,0.06)' }}
           >
             Try Interactive Demo
             <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

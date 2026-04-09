@@ -1,6 +1,3 @@
 export { HeroSection } from './HeroSection'
-export { AnimatedStats } from './AnimatedStats'
-export { HeroFallback } from './HeroFallback'
-export { CSSFloatingShapes } from './CSSFloatingShapes'
 export { GlowBackground } from './GlowBackground'
 export { DashboardPreviewCard } from './DashboardPreviewCard'

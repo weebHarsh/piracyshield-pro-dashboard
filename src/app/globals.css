@@ -118,6 +118,43 @@ h1, h2, h3, h4, h5, h6 {
   animation: card-float 5s ease-in-out infinite;
 }
 
+/* URL bar typing animation */
+@keyframes typing {
+  from { max-width: 0; }
+  to   { max-width: 100%; }
+}
+
+/* Section divider gradient line */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(20,184,166,0.25), transparent);
+}
+
+/* Scroll margin for nav offset */
+[id] {
+  scroll-margin-top: 5rem;
+}
+
+/* Popular badge float animation */
+@keyframes badge-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-3px); }
+}
+.animate-badge-float {
+  animation: badge-float 3s ease-in-out infinite;
+}
+
+/* Avatar gradient rotation */
+@keyframes gradient-rotate {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-gradient-rotate {
+  background-size: 200% 200%;
+  animation: gradient-rotate 4s ease infinite;
+}
+
 /* Skip Link for Accessibility */
 .skip-link {
   position: absolute;

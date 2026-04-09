@@ -11,10 +11,15 @@ export default function LandingPage() {
   return (
     <>
       <HeroSection />
+      <div className="section-divider" />
       <FeatureShowcase />
+      <div className="section-divider" />
       <LiveDemo />
+      <div className="section-divider" />
       <TestimonialsCarousel />
+      <div className="section-divider" />
       <PricingSection />
+      <div className="section-divider" />
       <CTASection />
     </>
   )

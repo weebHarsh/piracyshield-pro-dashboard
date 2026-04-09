@@ -1,14 +1,13 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
 
 const pricingTiers = [
   {
     id: 'free',
     name: 'Free',
     price: 0,
-    period: 'forever',
     description: 'Perfect for getting started',
     features: [
       '50 keywords monitored',
@@ -18,17 +17,17 @@ const pricingTiers = [
       'Email support',
     ],
     cta: 'Get Started',
+    href: '/signup',
     popular: false,
   },
   {
     id: 'pro',
     name: 'Pro',
     price: 99,
-    period: 'month',
     description: 'Best for growing creators',
     features: [
       'Unlimited keywords',
-      'All platforms (1000+)',
+      'All platforms (1,000+)',
       'Unlimited incidents',
       'Advanced analytics',
       'Automatic takedowns',
@@ -36,13 +35,13 @@ const pricingTiers = [
       'Priority support',
     ],
     cta: 'Start Free Trial',
+    href: '/signup',
     popular: true,
   },
   {
     id: 'enterprise',
     name: 'Enterprise',
-    price: 'Custom',
-    period: '',
+    price: null,
     description: 'For large organizations',
     features: [
       'Everything in Pro',
@@ -54,161 +53,283 @@ const pricingTiers = [
       '24/7 phone support',
     ],
     cta: 'Contact Sales',
+    href: '#contact',
     popular: false,
   },
 ]
 
-function PricingCard({ tier, index }: { tier: typeof pricingTiers[0]; index: number }) {
+function PriceDisplay({ price, yearly }: { price: number | null; yearly: boolean }) {
+  if (price === null) {
+    return (
+      <div className="flex items-baseline gap-2 h-12">
+        <span className="text-4xl font-bold text-white">Custom</span>
+      </div>
+    )
+  }
+  if (price === 0) {
+    return (
+      <div className="flex items-baseline gap-2 h-12">
+        <span className="text-4xl font-bold text-white">$0</span>
+        <span className="text-gray-400">/forever</span>
+      </div>
+    )
+  }
+
+  const monthlyDisplay = price
+  const yearlyDisplay  = Math.round(price * 0.8)
+  const shown          = yearly ? yearlyDisplay : monthlyDisplay
+
+  return (
+    <div className="h-12 flex items-baseline gap-2 overflow-hidden">
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={`${shown}-price`}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -16 }}
+          transition={{ duration: 0.22 }}
+          className="text-4xl font-bold text-white tabular-nums"
+        >
+          ${shown}
+        </motion.span>
+      </AnimatePresence>
+      <span className="text-gray-400">/mo</span>
+      {yearly && (
+        <span className="line-through text-gray-500 text-sm">${monthlyDisplay}</span>
+      )}
+    </div>
+  )
+}
+
+function PricingCard({
+  tier,
+  index,
+  yearly,
+}: {
+  tier: typeof pricingTiers[0]
+  index: number
+  yearly: boolean
+}) {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-50px' })
-  const [isHovered, setIsHovered] = useState(false)
-  
+
+  // Center card appears first, then flanks simultaneously
+  const delay = tier.popular ? 0 : 0.12
+
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 50 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className={`relative ${
-        tier.popular ? 'lg:-mt-4' : ''
-      }`}
+      transition={{ duration: 0.55, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+      whileHover={{ y: -8, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
+      className={`relative ${tier.popular ? 'lg:-mt-4' : ''}`}
     >
       {/* Popular badge */}
       {tier.popular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-semibold rounded-full shadow-lg">
-          Most Popular
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 animate-badge-float">
+          <span className="px-4 py-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-bold rounded-full shadow-lg shadow-teal-500/30">
+            Most Popular
+          </span>
         </div>
       )}
-      
-      <motion.div
-        whileHover={{ y: -8 }}
-        className={`h-full bg-gray-900/80 backdrop-blur-xl rounded-2xl border ${
-          tier.popular
-            ? 'border-teal-500/50 shadow-xl shadow-teal-500/20'
-            : 'border-gray-700/50'
-        } overflow-hidden`}
+
+      <div
+        className="h-full rounded-2xl overflow-hidden"
+        style={{
+          background: 'rgba(11,17,32,0.8)',
+          backdropFilter: 'blur(12px)',
+          border: tier.popular
+            ? '1px solid rgba(20,184,166,0.45)'
+            : '1px solid rgba(255,255,255,0.07)',
+          boxShadow: tier.popular ? '0 0 40px rgba(20,184,166,0.12)' : undefined,
+        }}
       >
-        {/* Gradient top border */}
+        {/* Top gradient bar for popular */}
         {tier.popular && (
-          <div className="h-1 bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-500" />
+          <div className="h-px bg-gradient-to-r from-transparent via-teal-500 to-transparent" />
         )}
-        
+
         <div className="p-8">
-          {/* Tier name */}
-          <h3 className="text-xl font-semibold text-white mb-2">{tier.name}</h3>
+          <h3 className="text-xl font-bold text-white mb-1">{tier.name}</h3>
           <p className="text-sm text-gray-400 mb-6">{tier.description}</p>
-          
-          {/* Price */}
-          <div className="mb-6">
-            <div className="flex items-baseline gap-2">
-              {typeof tier.price === 'number' ? (
-                <>
-                  <span className="text-4xl font-bold text-white">${tier.price}</span>
-                  <span className="text-gray-400">/{tier.period}</span>
-                </>
-              ) : (
-                <span className="text-4xl font-bold text-white">{tier.price}</span>
-              )}
-            </div>
+
+          <div className="mb-4">
+            <PriceDisplay price={tier.price} yearly={yearly} />
+            {yearly && tier.price !== null && tier.price > 0 && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-xs text-teal-400 mt-1"
+              >
+                Billed annually — save 20%
+              </motion.p>
+            )}
           </div>
-          
-          {/* Features */}
+
+          {/* Feature list */}
           <ul className="space-y-3 mb-8">
             {tier.features.map((feature, i) => (
               <motion.li
                 key={i}
-                initial={{ opacity: 0, x: -20 }}
-                animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-                transition={{ delay: index * 0.1 + i * 0.05 }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -10 }}
+                transition={{ delay: delay + 0.1 + i * 0.05 }}
                 className="flex items-start gap-3"
               >
-                <svg
-                  className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5"
+                <motion.svg
+                  initial={{ scale: 0 }}
+                  animate={isInView ? { scale: 1 } : { scale: 0 }}
+                  transition={{ delay: delay + 0.15 + i * 0.05, type: 'spring', stiffness: 400, damping: 15 }}
+                  className="w-4 h-4 text-teal-400 flex-shrink-0 mt-0.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </motion.svg>
                 <span className="text-sm text-gray-300">{feature}</span>
               </motion.li>
             ))}
           </ul>
-          
+
           {/* CTA */}
-          <motion.button
+          <motion.a
+            href={tier.href}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`w-full py-3 px-6 rounded-lg font-semibold transition-all ${
+            className={`block w-full py-3 px-6 text-center rounded-xl font-semibold transition-all ${
               tier.popular
-                ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/25'
-                : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
+                ? 'text-white'
+                : 'text-white border border-white/20 hover:border-white/40 hover:bg-white/[0.06]'
             }`}
+            style={
+              tier.popular
+                ? {
+                    background: 'linear-gradient(135deg, #0f766e 0%, #0d9488 100%)',
+                    boxShadow: '0 0 0 1px rgba(20,184,166,0.3), 0 8px 24px rgba(20,184,166,0.25)',
+                  }
+                : { background: 'rgba(255,255,255,0.04)' }
+            }
           >
             {tier.cta}
-          </motion.button>
+          </motion.a>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   )
 }
 
 export function PricingSection() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
+  const titleRef = useRef<HTMLDivElement>(null)
+  const isInView = useInView(titleRef, { once: true, margin: '-80px' })
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly')
-  
+  const yearly = billingPeriod === 'yearly'
+
+  const headingWords = ['Simple,']
+  const gradientWords = ['Transparent']
+  const restWords = ['Pricing']
+
   return (
-    <section ref={sectionRef} id="pricing" className="relative py-24 bg-gradient-to-b from-gray-900 to-gray-800">
+    <section id="pricing" className="relative py-24 bg-[#060d1a]">
+      {/* Teal orb */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/2 left-1/4 w-96 h-96 -translate-y-1/2 bg-teal-500/6 rounded-full blur-3xl" />
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section title */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
+        <div ref={titleRef} className="text-center mb-16">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+            transition={{ duration: 0.4 }}
+            className="text-teal-400 text-xs font-semibold uppercase tracking-widest mb-4"
+          >
+            Pricing
+          </motion.p>
+
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Simple,{' '}
-            <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
-              Transparent Pricing
-            </span>
+            {headingWords.map((word, i) => (
+              <motion.span
+                key={word + i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.1 + i * 0.04 }}
+                className="inline-block mr-2"
+              >
+                {word}
+              </motion.span>
+            ))}
+            {gradientWords.map((word, i) => (
+              <motion.span
+                key={word}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.14 + i * 0.04 }}
+                className="inline-block mr-2 bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent"
+              >
+                {word}
+              </motion.span>
+            ))}
+            {restWords.map((word, i) => (
+              <motion.span
+                key={word}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.18 + i * 0.04 }}
+                className="inline-block mr-2"
+              >
+                {word}
+              </motion.span>
+            ))}
           </h2>
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="text-lg text-gray-400 max-w-2xl mx-auto"
+          >
             Choose the plan that fits your needs. All plans include a 14-day free trial.
-          </p>
-          
+          </motion.p>
+
           {/* Billing toggle */}
           <div className="flex items-center justify-center gap-4 mt-8">
-            <span className={`text-sm ${billingPeriod === 'monthly' ? 'text-white' : 'text-gray-400'}`}>
+            <span className={`text-sm transition-colors ${!yearly ? 'text-white font-medium' : 'text-gray-500'}`}>
               Monthly
             </span>
             <button
-              onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'yearly' : 'monthly')}
-              className="relative w-14 h-7 bg-gray-700 rounded-full transition-colors"
+              onClick={() => setBillingPeriod(yearly ? 'monthly' : 'yearly')}
+              className="relative w-12 h-6 rounded-full transition-colors"
+              style={{
+                background: yearly ? 'rgba(20,184,166,0.3)' : 'rgba(255,255,255,0.12)',
+                border: '1px solid rgba(255,255,255,0.1)',
+              }}
+              aria-checked={yearly}
+              role="switch"
             >
               <motion.div
-                animate={{ x: billingPeriod === 'yearly' ? 28 : 0 }}
-                className="absolute left-0 top-0 w-7 h-7 bg-teal-500 rounded-full"
+                animate={{ x: yearly ? 24 : 2, y: '-50%' }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className="absolute left-0 top-1/2 w-5 h-5 rounded-full"
+                style={{ background: yearly ? '#14b8a6' : '#fff' }}
               />
             </button>
-            <span className={`text-sm ${billingPeriod === 'yearly' ? 'text-white' : 'text-gray-400'}`}>
+            <span className={`text-sm transition-colors ${yearly ? 'text-white font-medium' : 'text-gray-500'}`}>
               Yearly
-              <span className="ml-1 text-teal-400 text-xs">(Save 20%)</span>
+              <span className="ml-1.5 text-teal-400 text-xs font-semibold">−20%</span>
             </span>
           </div>
-        </motion.div>
-        
-        {/* Pricing cards */}
+        </div>
+
+        {/* Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
           {pricingTiers.map((tier, index) => (
-            <PricingCard key={tier.id} tier={tier} index={index} />
+            <PricingCard key={tier.id} tier={tier} index={index} yearly={yearly} />
           ))}
         </div>
-        
-        {/* FAQ link */}
+
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -216,9 +337,9 @@ export function PricingSection() {
           transition={{ delay: 0.5 }}
           className="text-center mt-12"
         >
-          <p className="text-gray-400">
+          <p className="text-gray-500 text-sm">
             Need help choosing?{' '}
-            <a href="#contact" className="text-teal-400 hover:text-teal-300 underline">
+            <a href="#contact" className="text-teal-400 hover:text-teal-300 transition-colors">
               Contact our sales team
             </a>
           </p>

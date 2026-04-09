@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, useInView } from 'framer-motion'
 
 const testimonials = [
   {
@@ -9,8 +9,8 @@ const testimonials = [
     name: 'Sarah Chen',
     role: 'Content Creator',
     company: 'TechReview Pro',
-    quote: 'PiracyShield found over 500 illegal streams of my course content in the first week. Within days, they took down 95% of them. My revenue increased by 40%.',
-    avatar: null,
+    quote: 'PiracyShield found over 500 illegal streams of my course content in the first week. Within days, 95% were taken down. My revenue increased by 40%.',
+    initials: 'SC',
     rating: 5,
   },
   {
@@ -18,17 +18,17 @@ const testimonials = [
     name: 'Michael Black',
     role: 'CEO',
     company: 'IndieFilm Studios',
-    quote: 'The automated takedown system saves us thousands in legal fees. What used to take weeks now happens in hours.',
-    avatar: null,
-    rating: 5,
+    quote: 'The automated takedown system saves us thousands in legal fees. What used to take weeks now happens in hours. Absolutely indispensable.',
+    initials: 'MB',
+    rating: 4,
   },
   {
     id: 3,
     name: 'Emma White',
     role: 'Digital Marketing Manager',
     company: 'Creative Agency',
-    quote: 'Real-time monitoring across 1000+ platforms is a game-changer. We caught a piracy ring that was distributing our content across 50 different sites.',
-    avatar: null,
+    quote: 'Real-time monitoring across 1,000+ platforms is a game-changer. We caught a piracy ring distributing our content across 50 different sites simultaneously.',
+    initials: 'EW',
     rating: 5,
   },
   {
@@ -36,45 +36,103 @@ const testimonials = [
     name: 'David Kim',
     role: 'Founder',
     company: 'EduTech Inc',
-    quote: 'The ROI is incredible. We estimated losing $200k annually to piracy. With PiracyShield, we\'ve reduced that by over 80%.',
-    avatar: null,
+    quote: 'The ROI is incredible. We estimated losing $200k annually to piracy. With PiracyShield we\'ve reduced that by over 80% in just three months.',
+    initials: 'DK',
+    rating: 4,
+  },
+  {
+    id: 5,
+    name: 'Priya Sharma',
+    role: 'Head of Content',
+    company: 'StreamVault',
+    quote: 'Onboarding took under an hour and we were monitoring live the same day. The dashboard is clean, the alerts are actionable, and the team is responsive.',
+    initials: 'PS',
     rating: 5,
   },
 ]
 
-function TestimonialCard({ testimonial, isActive }: { testimonial: typeof testimonials[0]; isActive: boolean }) {
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex gap-1 mb-4">
+      {[...Array(5)].map((_, i) => (
+        <motion.svg
+          key={i}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.05 * i, type: 'spring', stiffness: 400, damping: 15 }}
+          className={`w-4 h-4 ${i < rating ? 'text-yellow-400' : 'text-gray-700'}`}
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </motion.svg>
+      ))}
+    </div>
+  )
+}
+
+function TestimonialCard({ testimonial, index }: { testimonial: typeof testimonials[0]; index: number }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, margin: '-60px' })
+
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: isActive ? 1 : 0.5, scale: isActive ? 1 : 0.95 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.3 }}
-      className={`bg-gray-900/80 backdrop-blur-xl rounded-2xl p-8 border ${
-        isActive ? 'border-teal-500/50 shadow-xl shadow-teal-500/10' : 'border-gray-700/50'
-      }`}
+      ref={ref}
+      initial={{ opacity: 0, y: 30, rotateX: 8 }}
+      animate={isInView ? { opacity: 1, y: 0, rotateX: 0 } : { opacity: 0, y: 30, rotateX: 8 }}
+      transition={{ duration: 0.55, delay: index * 0.12, ease: [0.25, 0.46, 0.45, 0.94] }}
+      whileHover={{ y: -6, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
+      className="group relative"
+      style={{ perspective: '800px' }}
     >
-      {/* Stars */}
-      <div className="flex gap-1 mb-4">
-        {[...Array(testimonial.rating)].map((_, i) => (
-          <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-        ))}
-      </div>
+      <div
+        className="relative h-full rounded-2xl p-7 overflow-hidden transition-all duration-300"
+        style={{
+          background: 'rgba(11,17,32,0.8)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255,255,255,0.07)',
+        }}
+      >
+        {/* Glow on hover */}
+        <div
+          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"
+          style={{
+            border: '1px solid rgba(20,184,166,0.3)',
+            boxShadow: '0 0 30px rgba(20,184,166,0.06)',
+          }}
+        />
 
-      {/* Quote */}
-      <blockquote className="text-lg text-gray-200 mb-6 leading-relaxed">
-        "{testimonial.quote}"
-      </blockquote>
+        {/* Decorative quote mark */}
+        <motion.div
+          className="absolute top-4 left-5 text-7xl font-serif text-teal-500/10 leading-none select-none pointer-events-none"
+          whileHover={{ scale: 1.15 }}
+          transition={{ type: 'spring', stiffness: 300 }}
+        >
+          "
+        </motion.div>
 
-      {/* Author */}
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-purple-500 flex items-center justify-center text-white font-semibold">
-          {testimonial.name.split(' ').map(n => n[0]).join('')}
-        </div>
-        <div>
-          <div className="font-semibold text-white">{testimonial.name}</div>
-          <div className="text-sm text-gray-400">{testimonial.role} at {testimonial.company}</div>
+        <div className="relative z-10">
+          <StarRating rating={testimonial.rating} />
+
+          <blockquote className="text-gray-300 text-sm leading-relaxed mb-6">
+            "{testimonial.quote}"
+          </blockquote>
+
+          <div className="flex items-center gap-3">
+            {/* Avatar with gradient rotation */}
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 animate-gradient-rotate"
+              style={{
+                background: 'linear-gradient(135deg, #14b8a6, #8b5cf6, #06b6d4)',
+              }}
+            >
+              {testimonial.initials}
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-white">{testimonial.name}</div>
+              <div className="text-xs text-gray-500">{testimonial.role} · {testimonial.company}</div>
+            </div>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -82,102 +140,83 @@ function TestimonialCard({ testimonial, isActive }: { testimonial: typeof testim
 }
 
 export function TestimonialsCarousel() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [dragDirection, setDragDirection] = useState(0)
-  
-  const handleDragEnd = (_: any, info: { offset: { x: number } }) => {
-    const threshold = 50
-    if (info.offset.x > threshold) {
-      setActiveIndex(Math.max(0, activeIndex - 1))
-    } else if (info.offset.x < -threshold) {
-      setActiveIndex(Math.min(testimonials.length - 1, activeIndex + 1))
-    }
-  }
-  
+  const titleRef = useRef<HTMLDivElement>(null)
+  const isInView = useInView(titleRef, { once: true, margin: '-80px' })
+
+  const headingWords = ['Trusted', 'by']
+  const gradientWords = ['Content', 'Creators']
+  const restWords = ['Worldwide']
+
   return (
-    <section ref={sectionRef} id="testimonials" className="relative py-24 bg-gray-900">
-      {/* Background gradient */}
+    <section id="testimonials" className="relative py-24 bg-[#0b1120]">
+      {/* Background orb */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-teal-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-0 w-96 h-96 -translate-y-1/2 bg-purple-500/6 rounded-full blur-3xl" />
       </div>
-      
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section title */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
+        <div ref={titleRef} className="text-center mb-16">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+            transition={{ duration: 0.4 }}
+            className="text-teal-400 text-xs font-semibold uppercase tracking-widest mb-4"
+          >
+            Social Proof
+          </motion.p>
+
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Trusted by{' '}
-            <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
-              Content Creators
-            </span>{' '}
-            Worldwide
-          </h2>
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            See how PiracyShield helps creators protect their content and revenue.
-          </p>
-        </motion.div>
-        
-        {/* Carousel */}
-        <div className="relative max-w-4xl mx-auto">
-          <motion.div
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.1}
-            onDragEnd={handleDragEnd}
-            className="cursor-grab active:cursor-grabbing"
-          >
-            <AnimatePresence mode="wait">
-              <TestimonialCard
-                key={testimonials[activeIndex].id}
-                testimonial={testimonials[activeIndex]}
-                isActive={true}
-              />
-            </AnimatePresence>
-          </motion.div>
-          
-          {/* Navigation dots */}
-          <div className="flex justify-center gap-2 mt-6">
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setActiveIndex(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  index === activeIndex
-                    ? 'bg-teal-500 w-8'
-                    : 'bg-gray-600 hover:bg-gray-500'
-                }`}
-                aria-label={`Go to testimonial ${index + 1}`}
-              />
+            {headingWords.map((word, i) => (
+              <motion.span
+                key={word + i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.1 + i * 0.04 }}
+                className="inline-block mr-2"
+              >
+                {word}
+              </motion.span>
             ))}
-          </div>
-          
-          {/* Navigation arrows */}
-          <button
-            onClick={() => setActiveIndex(Math.max(0, activeIndex - 1))}
-            disabled={activeIndex === 0}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 w-10 h-10 rounded-full bg-gray-800 border border-gray-700 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors"
-            aria-label="Previous testimonial"
+            {gradientWords.map((word, i) => (
+              <motion.span
+                key={word}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.18 + i * 0.04 }}
+                className="inline-block mr-2 bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent"
+              >
+                {word}
+              </motion.span>
+            ))}
+            {restWords.map((word, i) => (
+              <motion.span
+                key={word}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.26 + i * 0.04 }}
+                className="inline-block mr-2"
+              >
+                {word}
+              </motion.span>
+            ))}
+          </h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            className="text-lg text-gray-400 max-w-2xl mx-auto"
           >
-            <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <button
-            onClick={() => setActiveIndex(Math.min(testimonials.length - 1, activeIndex + 1))}
-            disabled={activeIndex === testimonials.length - 1}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 w-10 h-10 rounded-full bg-gray-800 border border-gray-700 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors"
-            aria-label="Next testimonial"
-          >
-            <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+            See how PiracyShield helps creators protect their content and revenue.
+          </motion.p>
+        </div>
+
+        {/* 3-col grid on desktop, 2-col tablet, 1-col mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonials.map((testimonial, index) => (
+            <TestimonialCard key={testimonial.id} testimonial={testimonial} index={index} />
+          ))}
         </div>
       </div>
     </section>
