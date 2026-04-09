@@ -133,12 +133,11 @@ function PricingCard({
       initial={{ opacity: 0, y: 50 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
       transition={{ duration: 0.55, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
-      whileHover={{ y: -8, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
       className="relative"
     >
       {/* Popular badge */}
       {tier.popular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 animate-badge-float">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
           <span className="px-4 py-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-bold rounded-full shadow-lg shadow-teal-500/30">
             Most Popular
           </span>
@@ -146,15 +145,11 @@ function PricingCard({
       )}
 
       <div
-        className="h-full rounded-2xl overflow-hidden"
-        style={{
-          background: 'rgba(11,17,32,0.8)',
-          backdropFilter: 'blur(12px)',
-          border: tier.popular
-            ? '1px solid rgba(20,184,166,0.45)'
-            : '1px solid rgba(255,255,255,0.07)',
-          boxShadow: tier.popular ? '0 0 40px rgba(20,184,166,0.12)' : undefined,
-        }}
+        className={`h-full rounded-2xl overflow-hidden card-surface-elevated ${
+          tier.popular
+            ? 'border-teal-500/45 shadow-[0_0_40px_rgba(20,184,166,0.12)]'
+            : ''
+        }`}
       >
         {/* Top gradient bar for popular */}
         {tier.popular && (
@@ -167,40 +162,22 @@ function PricingCard({
 
           <div className="mb-4">
             <PriceDisplay price={tier.price} yearly={yearly} />
-            {yearly && tier.price !== null && tier.price > 0 && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-xs text-teal-400 mt-1"
-              >
-                Billed annually — save 20%
-              </motion.p>
-            )}
           </div>
 
           {/* Feature list */}
           <ul className="space-y-3 mb-8">
             {tier.features.map((feature, i) => (
-              <motion.li
-                key={i}
-                initial={{ opacity: 0, x: -10 }}
-                animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -10 }}
-                transition={{ delay: delay + 0.1 + i * 0.05 }}
-                className="flex items-start gap-3"
-              >
-                <motion.svg
-                  initial={{ scale: 0 }}
-                  animate={isInView ? { scale: 1 } : { scale: 0 }}
-                  transition={{ delay: delay + 0.15 + i * 0.05, type: 'spring', stiffness: 400, damping: 15 }}
+              <li key={i} className="flex items-start gap-3">
+                <svg
                   className="w-4 h-4 text-teal-400 flex-shrink-0 mt-0.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </motion.svg>
+                </svg>
                 <span className="text-sm text-gray-300">{feature}</span>
-              </motion.li>
+              </li>
             ))}
           </ul>
 
@@ -237,17 +214,8 @@ export function PricingSection() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly')
   const yearly = billingPeriod === 'yearly'
 
-  const headingWords = ['Simple,']
-  const gradientWords = ['Transparent']
-  const restWords = ['Pricing']
-
   return (
     <section id="pricing" className="relative py-24 bg-[#060d1a]">
-      {/* Teal orb */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 left-1/4 w-96 h-96 -translate-y-1/2 bg-teal-500/6 rounded-full blur-3xl" />
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section title */}
         <div ref={titleRef} className="text-center mb-16">
@@ -260,41 +228,18 @@ export function PricingSection() {
             Pricing
           </motion.p>
 
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            {headingWords.map((word, i) => (
-              <motion.span
-                key={word + i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.1 + i * 0.04 }}
-                className="inline-block mr-2"
-              >
-                {word}
-              </motion.span>
-            ))}
-            {gradientWords.map((word, i) => (
-              <motion.span
-                key={word}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.14 + i * 0.04 }}
-                className="inline-block mr-2 bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent"
-              >
-                {word}
-              </motion.span>
-            ))}
-            {restWords.map((word, i) => (
-              <motion.span
-                key={word}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.18 + i * 0.04 }}
-                className="inline-block mr-2"
-              >
-                {word}
-              </motion.span>
-            ))}
-          </h2>
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-3xl sm:text-4xl font-bold text-white mb-4"
+          >
+            Simple,{' '}
+            <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
+              Transparent
+            </span>{' '}
+            Pricing
+          </motion.h2>
 
           <motion.p
             initial={{ opacity: 0, y: 16 }}

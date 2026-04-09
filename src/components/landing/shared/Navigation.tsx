@@ -88,11 +88,13 @@ export function Navigation() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -20, opacity: 0 }}
           transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-          className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+          className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+            isScrolled
+              ? 'border-b border-white/[0.07] backdrop-blur-xl'
+              : 'border-b border-transparent'
+          }`}
           style={{
             background: isScrolled ? 'rgba(15,23,42,0.85)' : 'transparent',
-            backdropFilter: isScrolled ? 'blur(20px)' : 'none',
-            borderBottom: isScrolled ? '1px solid rgba(255,255,255,0.07)' : '1px solid transparent',
           }}
           aria-label="Main navigation"
         >
@@ -124,24 +126,12 @@ export function Navigation() {
                 >
                   Sign In
                 </Link>
-                <motion.div
-                  animate={{
-                    boxShadow: [
-                      '0 0 20px rgba(20,184,166,0.2)',
-                      '0 0 32px rgba(20,184,166,0.45)',
-                      '0 0 20px rgba(20,184,166,0.2)',
-                    ],
-                  }}
-                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                  className="rounded-lg"
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-teal-600 to-teal-700 text-white text-sm font-semibold rounded-lg shadow-[0_0_20px_rgba(20,184,166,0.2)] hover:shadow-[0_0_32px_rgba(20,184,166,0.4)] hover:from-teal-700 hover:to-teal-800 transition-all"
                 >
-                  <Link
-                    href="/signup"
-                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-teal-600 to-teal-700 text-white text-sm font-semibold rounded-lg hover:from-teal-700 hover:to-teal-800 transition-all"
-                  >
-                    Start Free Trial
-                  </Link>
-                </motion.div>
+                  Start Free Trial
+                </Link>
               </div>
 
               {/* Mobile hamburger */}
@@ -170,12 +160,7 @@ export function Navigation() {
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="md:hidden overflow-hidden"
-                style={{
-                  background: 'rgba(15,23,42,0.97)',
-                  backdropFilter: 'blur(20px)',
-                  borderTop: '1px solid rgba(255,255,255,0.07)',
-                }}
+                className="md:hidden overflow-hidden card-surface-elevated border-t border-white/[0.07]"
               >
                 <motion.div
                   initial="hidden"

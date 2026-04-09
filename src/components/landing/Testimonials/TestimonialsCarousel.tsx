@@ -49,23 +49,29 @@ const testimonials = [
     initials: 'PS',
     rating: 5,
   },
+  {
+    id: 6,
+    name: 'James Okafor',
+    role: 'IP Counsel',
+    company: 'MediaGuard Legal',
+    quote: 'The DMCA workflow is the best I\'ve seen — notices are legally sound, filed fast, and the audit trail makes enforcement cases trivial. We\'ve recommended it to every client.',
+    initials: 'JO',
+    rating: 5,
+  },
 ]
 
 function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex gap-1 mb-4">
       {[...Array(5)].map((_, i) => (
-        <motion.svg
+        <svg
           key={i}
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.05 * i, type: 'spring', stiffness: 400, damping: 15 }}
           className={`w-4 h-4 ${i < rating ? 'text-yellow-400' : 'text-gray-700'}`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </motion.svg>
+        </svg>
       ))}
     </div>
   )
@@ -78,60 +84,24 @@ function TestimonialCard({ testimonial, index }: { testimonial: typeof testimoni
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 30, rotateX: 8 }}
-      animate={isInView ? { opacity: 1, y: 0, rotateX: 0 } : { opacity: 0, y: 30, rotateX: 8 }}
-      transition={{ duration: 0.55, delay: index * 0.12, ease: [0.25, 0.46, 0.45, 0.94] }}
-      whileHover={{ y: -6, transition: { type: 'spring', stiffness: 300, damping: 20 } }}
-      className="group relative"
-      style={{ perspective: '800px' }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+      transition={{ duration: 0.55, delay: index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
-      <div
-        className="relative h-full rounded-2xl p-7 overflow-hidden transition-all duration-300"
-        style={{
-          background: 'rgba(11,17,32,0.8)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255,255,255,0.07)',
-        }}
-      >
-        {/* Glow on hover */}
-        <div
-          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"
-          style={{
-            border: '1px solid rgba(20,184,166,0.3)',
-            boxShadow: '0 0 30px rgba(20,184,166,0.06)',
-          }}
-        />
+      <div className="card-surface-elevated h-full rounded-2xl p-7 transition-colors duration-300 hover:border-teal-500/30">
+        <StarRating rating={testimonial.rating} />
 
-        {/* Decorative quote mark */}
-        <motion.div
-          className="absolute top-4 left-5 text-7xl font-serif text-teal-500/10 leading-none select-none pointer-events-none"
-          whileHover={{ scale: 1.15 }}
-          transition={{ type: 'spring', stiffness: 300 }}
-        >
-          "
-        </motion.div>
+        <blockquote className="text-gray-300 text-sm leading-relaxed mb-6">
+          &ldquo;{testimonial.quote}&rdquo;
+        </blockquote>
 
-        <div className="relative z-10">
-          <StarRating rating={testimonial.rating} />
-
-          <blockquote className="text-gray-300 text-sm leading-relaxed mb-6">
-            "{testimonial.quote}"
-          </blockquote>
-
-          <div className="flex items-center gap-3">
-            {/* Avatar with gradient rotation */}
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 animate-gradient-rotate"
-              style={{
-                background: 'linear-gradient(135deg, #14b8a6, #8b5cf6, #06b6d4)',
-              }}
-            >
-              {testimonial.initials}
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-white">{testimonial.name}</div>
-              <div className="text-xs text-gray-500">{testimonial.role} · {testimonial.company}</div>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 bg-gradient-to-br from-teal-500 to-cyan-500">
+            {testimonial.initials}
+          </div>
+          <div>
+            <div className="text-sm font-semibold text-white">{testimonial.name}</div>
+            <div className="text-xs text-gray-500">{testimonial.role} · {testimonial.company}</div>
           </div>
         </div>
       </div>
@@ -143,17 +113,8 @@ export function TestimonialsCarousel() {
   const titleRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(titleRef, { once: true, margin: '-80px' })
 
-  const headingWords = ['Trusted', 'by']
-  const gradientWords = ['Content', 'Creators']
-  const restWords = ['Worldwide']
-
   return (
     <section id="testimonials" className="relative py-24 bg-[#060d1a]">
-      {/* Background orb */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 right-0 w-96 h-96 -translate-y-1/2 bg-purple-500/6 rounded-full blur-3xl" />
-      </div>
-
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section title */}
         <div ref={titleRef} className="text-center mb-16">
@@ -166,41 +127,18 @@ export function TestimonialsCarousel() {
             Social Proof
           </motion.p>
 
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            {headingWords.map((word, i) => (
-              <motion.span
-                key={word + i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.1 + i * 0.04 }}
-                className="inline-block mr-2"
-              >
-                {word}
-              </motion.span>
-            ))}
-            {gradientWords.map((word, i) => (
-              <motion.span
-                key={word}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.18 + i * 0.04 }}
-                className="inline-block mr-2 bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent"
-              >
-                {word}
-              </motion.span>
-            ))}
-            {restWords.map((word, i) => (
-              <motion.span
-                key={word}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.26 + i * 0.04 }}
-                className="inline-block mr-2"
-              >
-                {word}
-              </motion.span>
-            ))}
-          </h2>
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-3xl sm:text-4xl font-bold text-white mb-4"
+          >
+            Trusted by{' '}
+            <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
+              Content Creators
+            </span>{' '}
+            Worldwide
+          </motion.h2>
 
           <motion.p
             initial={{ opacity: 0, y: 16 }}

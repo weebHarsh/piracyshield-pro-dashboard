@@ -67,10 +67,10 @@ function HeroStat({
       transition={{ delay }}
       className="text-left"
     >
-      <div className="text-2xl font-bold text-white tabular-nums">
+      <div className="text-xl font-bold text-white tabular-nums">
         {display(count)}
       </div>
-      <div className="text-xs text-gray-500 mt-0.5 uppercase tracking-wide">
+      <div className="text-[11px] text-gray-500 mt-0.5 uppercase tracking-wide">
         {label}
       </div>
     </motion.div>
@@ -130,7 +130,7 @@ export function HeroSection() {
             >
               Detect Piracy.
               <br />
-              <span className="bg-gradient-to-br from-teal-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-br from-teal-400 to-cyan-400 bg-clip-text text-transparent">
                 Protect Revenue.
               </span>
             </motion.h1>
@@ -152,29 +152,17 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-3 mb-14"
+              className="flex flex-col sm:flex-row gap-3 mb-10"
             >
-              <motion.div
-                animate={{
-                  boxShadow: [
-                    '0 0 0 1px rgba(20,184,166,0.3), 0 8px 24px rgba(20,184,166,0.25)',
-                    '0 0 0 1px rgba(20,184,166,0.5), 0 12px 32px rgba(20,184,166,0.45)',
-                    '0 0 0 1px rgba(20,184,166,0.3), 0 8px 24px rgba(20,184,166,0.25)',
-                  ],
-                }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                className="rounded-xl"
+              <Link
+                href="/signup"
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 font-semibold text-white rounded-xl bg-gradient-to-br from-teal-800 to-teal-600 shadow-[0_8px_24px_rgba(20,184,166,0.25)] transition-shadow duration-200 hover:shadow-[0_12px_32px_rgba(20,184,166,0.45)] hover:brightness-110"
               >
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 font-semibold text-white rounded-xl bg-gradient-to-br from-teal-800 to-teal-600 transition-all duration-200 hover:brightness-110"
-                >
-                  Start Free Trial
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Link>
-              </motion.div>
+                Start Free Trial
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
 
               <Link
                 href="#demo"

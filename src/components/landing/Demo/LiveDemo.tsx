@@ -91,8 +91,7 @@ function IncidentsTab() {
 
       {/* Incident rows */}
       <div
-        className="rounded-xl overflow-hidden"
-        style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
+        className="card-surface rounded-xl overflow-hidden"
       >
         {incidents.map((inc, i) => (
           <div
@@ -146,8 +145,7 @@ function TakedownsTab() {
         ))}
       </div>
       <div
-        className="rounded-xl overflow-hidden"
-        style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
+        className="card-surface rounded-xl overflow-hidden"
       >
         {takedowns.map((t, i) => {
           const pct = Math.round((t.resolved / t.count) * 100)
@@ -207,8 +205,7 @@ function AnalyticsTab() {
         ))}
       </div>
       <div
-        className="rounded-xl overflow-hidden"
-        style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
+        className="card-surface rounded-xl overflow-hidden"
       >
         {platformStats.map((p, i) => (
           <div
@@ -245,11 +242,6 @@ export function LiveDemo() {
 
   return (
     <section ref={sectionRef} id="demo" className="relative py-24 bg-[#060d1a]">
-      {/* Cyan glow accent */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 right-0 w-[500px] h-[500px] -translate-y-1/2 bg-cyan-500/5 rounded-full blur-3xl" />
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section title */}
         <div ref={titleRef} className="text-center mb-12">
@@ -261,14 +253,17 @@ export function LiveDemo() {
           >
             Live Dashboard Preview
           </motion.p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            {['See', 'PiracyShield'].map((w, i) => (
-              <motion.span key={w} initial={{ opacity: 0, y: 20 }} animate={isTitleInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.1 + i * 0.05 }} className="inline-block mr-2">{w}</motion.span>
-            ))}
-            {['In', 'Action'].map((w, i) => (
-              <motion.span key={w} initial={{ opacity: 0, y: 20 }} animate={isTitleInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.2 + i * 0.05 }} className="inline-block mr-2 bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">{w}</motion.span>
-            ))}
-          </h2>
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            animate={isTitleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-3xl sm:text-4xl font-bold text-white mb-4"
+          >
+            See PiracyShield{' '}
+            <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
+              In Action
+            </span>
+          </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={isTitleInView ? { opacity: 1, y: 0 } : {}}
@@ -284,8 +279,7 @@ export function LiveDemo() {
           initial={{ opacity: 0, y: 50 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="rounded-2xl overflow-hidden shadow-2xl"
-          style={{ border: '1px solid rgba(255,255,255,0.09)', background: 'rgba(9,15,28,0.98)' }}
+          className="rounded-2xl overflow-hidden shadow-2xl card-surface-elevated"
         >
           {/* Browser chrome */}
           <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ background: 'rgba(15,23,42,0.98)', borderColor: 'rgba(255,255,255,0.07)' }}>

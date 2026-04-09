@@ -55,20 +55,12 @@ export function DashboardPreviewCard() {
       className="relative w-full max-w-md mx-auto lg:mx-0"
       style={{ perspective: '1200px' }}
     >
-      {/* Outer glow */}
-      <div className="absolute -inset-4 bg-gradient-to-br from-teal-500/20 to-purple-500/10 rounded-3xl blur-2xl" />
-
       {/* Floating card */}
-      <div className="animate-card-float relative">
+      <div className="relative hover:-translate-y-1 transition-transform duration-300">
 
         {/* Glass card */}
         <div
-          className="relative rounded-2xl overflow-hidden shadow-2xl"
-          style={{
-            background: 'rgba(15, 23, 42, 0.85)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.08)',
-          }}
+          className="relative rounded-2xl overflow-hidden shadow-2xl card-surface-elevated"
         >
           {/* Top accent line */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-teal-500/60 to-transparent" />
@@ -89,7 +81,7 @@ export function DashboardPreviewCard() {
                 Live
               </span>
               <div className="flex gap-1">
-                <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
+                <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
               </div>
             </div>
           </div>
@@ -159,18 +151,7 @@ export function DashboardPreviewCard() {
             </span>
           </div>
 
-          {/* Bottom accent line */}
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent" />
         </div>
-
-        {/* Reflection / depth shadow */}
-        <div
-          className="absolute -bottom-6 left-4 right-4 h-12 rounded-full opacity-30"
-          style={{
-            background: 'radial-gradient(ellipse, rgba(20,184,166,0.4) 0%, transparent 70%)',
-            filter: 'blur(8px)',
-          }}
-        />
       </div>
     </motion.div>
   )

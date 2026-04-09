@@ -8,7 +8,6 @@ const features = [
     id: 'ai-engine',
     title: 'AI-Powered Detection',
     description: 'Machine learning models scan 1,000+ platforms around the clock, surfacing unauthorized copies as soon as they appear.',
-    accent: '#14b8a6',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
         <path d="M12 2a4 4 0 0 1 4 4v1h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1v1a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-1H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1V6a4 4 0 0 1 4-4h4z"/>
@@ -22,7 +21,6 @@ const features = [
     id: 'real-time',
     title: 'Real-Time Alerts',
     description: '24/7 automated surveillance with instant notifications the moment infringing content is detected across any monitored platform.',
-    accent: '#818cf8',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -33,7 +31,6 @@ const features = [
     id: 'platforms',
     title: '1,000+ Platforms',
     description: 'Comprehensive coverage across streaming sites, torrent trackers, social media, cyberlockers, and private Telegram channels.',
-    accent: '#38bdf8',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
         <circle cx="12" cy="12" r="10"/>
@@ -46,7 +43,6 @@ const features = [
     id: 'takedowns',
     title: 'Automatic Takedowns',
     description: 'DMCA notices are drafted and filed automatically the moment a violation is confirmed — no manual intervention needed.',
-    accent: '#34d399',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -58,7 +54,6 @@ const features = [
     id: 'analytics',
     title: 'Protection Analytics',
     description: 'Clear dashboards showing incident trends, takedown success rates, geographic distribution, and revenue impact estimates.',
-    accent: '#fb923c',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
         <line x1="18" y1="20" x2="18" y2="10"/>
@@ -72,7 +67,6 @@ const features = [
     id: 'team',
     title: 'Team Workspace',
     description: 'Role-based access control, shared incident queues, activity logs, and comment threads — built for legal and content teams.',
-    accent: '#c084fc',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -94,37 +88,10 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
       initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
       transition={{ duration: 0.5, delay: index * 0.07, ease: [0.25, 0.46, 0.45, 0.94] }}
-      whileHover={{ y: -8, transition: { type: 'spring', stiffness: 300, damping: 22 } }}
-      className="group relative"
     >
-      <div
-        className="relative h-full rounded-2xl p-6 transition-all duration-300"
-        style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.07)',
-        }}
-      >
-        {/* Hover glow border */}
-        <div
-          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-          style={{ border: `1px solid ${feature.accent}40`, boxShadow: `0 0 24px ${feature.accent}10` }}
-        />
-
-        {/* Top accent line on hover */}
-        <div
-          className="absolute top-0 left-6 right-6 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"
-          style={{ background: `linear-gradient(90deg, transparent, ${feature.accent}, transparent)` }}
-        />
-
+      <div className="card-surface h-full rounded-2xl p-6 transition-colors duration-300 hover:border-teal-500/30">
         {/* Icon */}
-        <div
-          className="w-11 h-11 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110"
-          style={{
-            background: `${feature.accent}14`,
-            border: `1px solid ${feature.accent}28`,
-            color: feature.accent,
-          }}
-        >
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5 bg-teal-500/10 border border-teal-500/20 text-teal-400">
           {feature.icon}
         </div>
 
@@ -141,12 +108,6 @@ export function FeatureShowcase() {
 
   return (
     <section id="features" className="relative py-24 bg-[#060d1a]">
-      {/* Background glow orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-teal-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-3xl" />
-      </div>
-
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section title */}
         <div ref={titleRef} className="text-center mb-16">
@@ -159,30 +120,17 @@ export function FeatureShowcase() {
             Why PiracyShield
           </motion.p>
 
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            {['Powerful', 'Features', 'for'].map((word, i) => (
-              <motion.span
-                key={word + i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.1 + i * 0.04 }}
-                className="inline-block mr-2"
-              >
-                {word}
-              </motion.span>
-            ))}
-            {['Complete', 'Protection'].map((word, i) => (
-              <motion.span
-                key={word}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.22 + i * 0.04 }}
-                className="inline-block mr-2 bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent"
-              >
-                {word}
-              </motion.span>
-            ))}
-          </h2>
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-3xl sm:text-4xl font-bold text-white mb-4"
+          >
+            Powerful Features for{' '}
+            <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
+              Complete Protection
+            </span>
+          </motion.h2>
 
           <motion.p
             initial={{ opacity: 0, y: 16 }}
