@@ -173,8 +173,16 @@ export function Header({ onMobileMenuToggle }: HeaderProps = {}) {
                           className={`flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 ${!notif.read ? 'bg-teal-50/30' : ''}`}
                           role="menuitem"
                         >
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-sm ${notifColors[notif.type]}`}>
-                            {notif.type === 'incident' ? '!' : notif.type === 'takedown' ? '✓' : notif.type === 'alert' ? '⚡' : 'i'}
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${notifColors[notif.type]}`}>
+                            {notif.type === 'incident' ? (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                            ) : notif.type === 'takedown' ? (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            ) : notif.type === 'alert' ? (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                            ) : (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-slate-900">{notif.message}</p>

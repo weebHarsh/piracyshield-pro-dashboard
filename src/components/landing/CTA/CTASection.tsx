@@ -5,17 +5,9 @@ import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { useCountUp } from '@/hooks'
 
-const trustBadges = [
-  'SOC 2 Compliant',
-  'GDPR Ready',
-  '99.9% Uptime',
-  'Enterprise Grade',
-]
-
 const stats = [
-  { value: 1000, display: (n: number) => `${n.toLocaleString()}+`, label: 'Platforms Monitored' },
-  { value: 95,   display: (n: number) => `${n}%`,                  label: 'Takedown Success'    },
-  { value: 14,   display: (n: number) => `${n}-day`,               label: 'Free Trial'          },
+  { value: 1200000, display: (n: number) => `${(n / 1000000).toFixed(1)}M`, label: 'Takedowns processed' },
+  { value: 47,      display: (n: number) => `${n}h`,                         label: 'Avg. removal time'  },
 ]
 
 function AnimatedStat({
@@ -39,7 +31,7 @@ function AnimatedStat({
       transition={{ delay, duration: 0.5 }}
       className="text-center"
     >
-      <div className="text-3xl sm:text-4xl font-bold text-white mb-1 tabular-nums">
+      <div className="tabular text-3xl sm:text-4xl font-medium text-white mb-1">
         {display(count)}
       </div>
       <div className="text-sm text-white/70">{label}</div>
@@ -52,18 +44,10 @@ export function CTASection() {
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
 
   return (
-    <section ref={sectionRef} className="relative py-24 overflow-hidden">
-      {/* Solid teal gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-teal-700 via-teal-600 to-cyan-600" />
+    <section ref={sectionRef} className="relative py-24 overflow-hidden bg-[var(--brand-strong)]">
 
       {/* Dot grid texture overlay */}
-      <div className="absolute inset-0 hero-dot-grid opacity-[0.15]" />
-
-      {/* Static radial depth glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.08) 0%, transparent 65%)' }}
-      />
+      <div className="absolute inset-0 hero-dot-grid opacity-10" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -72,11 +56,15 @@ export function CTASection() {
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
-            Ready to Protect Your Content?
+          <h2
+            className="text-3xl sm:text-4xl lg:text-5xl font-medium text-white mb-6 leading-tight tracking-[-0.03em]"
+            style={{ fontFamily: 'var(--font-display-loaded, var(--font-sans-loaded, system-ui))' }}
+          >
+            Ready to protect your content?
           </h2>
-          <p className="text-lg sm:text-xl text-white/85 max-w-2xl mx-auto mb-10">
-            Join thousands of creators and rights-holders who use PiracyShield to monitor, detect, and remove piracy automatically.
+          <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Rights-holders use PiracyShield to monitor, detect, and remove piracy automatically —
+            without retaining counsel for every notice.
           </p>
 
           {/* Stats */}
@@ -97,62 +85,38 @@ export function CTASection() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.4 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/signup"
-                className="inline-flex items-center justify-center px-8 py-4 bg-white text-teal-700 font-bold rounded-xl hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl"
-              >
-                Start Free Trial
-                <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="#demo"
-                className="inline-flex items-center justify-center px-8 py-4 text-white font-semibold rounded-xl transition-all border border-white/30 hover:border-white/50 hover:bg-white/10"
-              >
-                Schedule Demo
-              </Link>
-            </motion.div>
+            <Link
+              href="/signup"
+              className="btn-press inline-flex items-center justify-center px-8 py-4 bg-white text-[var(--brand-strong)] font-semibold rounded-xl hover:bg-[var(--brand-soft)] transition-colors duration-[var(--dur-ui-fast)] shadow-xl"
+            >
+              Start Free Trial
+              <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+            <Link
+              href="#demo"
+              className="btn-press inline-flex items-center justify-center px-8 py-4 text-white font-semibold rounded-xl transition-colors duration-[var(--dur-ui-fast)] border border-white/30 hover:border-white/50 hover:bg-white/10"
+            >
+              Schedule Demo
+            </Link>
           </motion.div>
 
-          {/* Trust badges */}
+          {/* Trust — SOC 2 and GDPR only, no slop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ delay: 0.8 }}
-            className="mt-12 pt-8 border-t border-white/20"
+            transition={{ delay: 0.6 }}
+            className="mt-12 pt-8 border-t border-white/20 flex flex-wrap justify-center gap-6"
           >
-            <p className="text-sm text-white/50 mb-5">Enterprise-ready from day one</p>
-            <motion.div
-              initial="hidden"
-              animate={isInView ? 'visible' : 'hidden'}
-              variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
-              className="flex flex-wrap justify-center gap-3"
-            >
-              {trustBadges.map((badge) => (
-                <motion.span
-                  key={badge}
-                  variants={{
-                    hidden:  { opacity: 0, scale: 0.85 },
-                    visible: { opacity: 1, scale: 1 },
-                  }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  className="px-4 py-1.5 text-xs font-medium text-white/80 rounded-full"
-                  style={{
-                    background: 'rgba(255,255,255,0.12)',
-                    border: '1px solid rgba(255,255,255,0.22)',
-                  }}
-                >
-                  {badge}
-                </motion.span>
-              ))}
-            </motion.div>
+            {['SOC 2 Type II', 'GDPR Ready', 'DMCA Compliant'].map((badge) => (
+              <span key={badge} className="text-sm text-white/60 font-medium">
+                {badge}
+              </span>
+            ))}
           </motion.div>
         </motion.div>
       </div>

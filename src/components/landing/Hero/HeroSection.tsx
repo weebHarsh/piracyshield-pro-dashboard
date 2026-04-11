@@ -1,10 +1,9 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { GlowBackground } from './GlowBackground'
 import { DashboardPreviewCard } from './DashboardPreviewCard'
 import { useDeviceCapabilities, useReducedMotion, useInView, useCountUp } from '@/hooks'
 
@@ -15,9 +14,9 @@ const Scene = dynamic(
 )
 
 const stats = [
-  { value: 2847, display: (n: number) => `${n.toLocaleString()}+`, label: 'Threats detected' },
-  { value: 95,   display: (n: number) => `${n}%`,                  label: 'Takedown success' },
-  { value: 15000,display: (n: number) => `${(n / 1000).toFixed(0)}k+`, label: 'Creators protected' },
+  { value: 1200000, display: (n: number) => `${(n / 1000000).toFixed(1)}M`, label: 'Takedowns processed' },
+  { value: 47,      display: (n: number) => `${n}h`,                         label: 'Avg. removal time'  },
+  { value: 15000,   display: (n: number) => `${(n / 1000).toFixed(0)}k+`,    label: 'Creators protected' },
 ]
 
 type Tier = 1 | 2 | 3
@@ -67,13 +66,22 @@ function HeroStat({
       transition={{ delay }}
       className="text-left"
     >
-      <div className="text-xl font-bold text-white tabular-nums">
+      <div className="tabular text-xl font-medium text-[var(--text)]">
         {display(count)}
       </div>
-      <div className="text-[11px] text-gray-500 mt-0.5 uppercase tracking-wide">
+      <div className="text-[11px] text-[var(--text-subtle)] mt-0.5 uppercase tracking-wide">
         {label}
       </div>
     </motion.div>
+  )
+}
+
+// GlowBackground is loaded only when 3D is not available
+function GlowBackground() {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="hero-glow absolute inset-0" />
+    </div>
   )
 }
 
@@ -84,19 +92,18 @@ export function HeroSection() {
   return (
     <section
       ref={inViewRef}
-      className="relative bg-[#060d1a] overflow-hidden"
+      className="relative bg-[var(--bg)] overflow-hidden"
     >
       {/* Background layers */}
       <div className="absolute inset-0 hero-dot-grid opacity-60" />
-      <div className="absolute inset-0 bg-gradient-to-br from-teal-950/40 via-transparent to-purple-950/30" />
 
       {/* Tier 1 — full 3D network */}
       {ready && tier === 1 && (
         <Scene isActive={isInView} isMobile={isMobile} />
       )}
 
-      {/* Tier 2 — glow orbs */}
-      {(!ready || tier === 2) && <GlowBackground />}
+      {/* Tier 2/3 — subtle glow */}
+      {(!ready || tier >= 2) && <GlowBackground />}
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20">
@@ -110,29 +117,26 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-8 bg-teal-500/[0.08] border border-teal-500/20"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-8 bg-[var(--brand-dim)] border border-[var(--brand)]/25"
             >
-              <div className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-60" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-400" />
-              </div>
-              <span className="text-teal-400 text-xs font-semibold uppercase tracking-widest">
-                AI-Powered Piracy Detection
+              {/* Static dot — no ping */}
+              <span className="inline-flex rounded-full h-2 w-2 bg-[var(--brand)]" />
+              <span className="text-[var(--brand)] text-xs font-semibold uppercase tracking-widest">
+                AI-Powered Protection
               </span>
             </motion.div>
 
-            {/* Headline */}
+            {/* Headline — no gradient text */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6"
+              className="text-[var(--text-display-xl)] font-medium text-[var(--text)] leading-[0.95] tracking-[-0.04em] mb-6"
+              style={{ fontFamily: 'var(--font-display-loaded, var(--font-sans-loaded, system-ui))' }}
             >
               Detect Piracy.
               <br />
-              <span className="bg-gradient-to-br from-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                Protect Revenue.
-              </span>
+              <em className="not-italic text-[var(--brand)]">Protect Revenue.</em>
             </motion.h1>
 
             {/* Subtitle */}
@@ -140,11 +144,10 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-base sm:text-lg text-gray-400 mb-10 max-w-lg leading-relaxed"
+              className="text-base sm:text-lg text-[var(--text-muted)] mb-10 max-w-lg leading-relaxed prose"
             >
-              Monitor 1,000+ platforms in real-time. AI detects unauthorized
-              copies the moment they appear — and automatically fires takedowns
-              before they spread.
+              Monitor 1,000+ platforms in real-time. Detected the moment
+              unauthorized copies appear — takedowns fired before they spread.
             </motion.p>
 
             {/* CTAs */}
@@ -156,7 +159,7 @@ export function HeroSection() {
             >
               <Link
                 href="/signup"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 font-semibold text-white rounded-xl bg-gradient-to-br from-teal-800 to-teal-600 shadow-[0_8px_24px_rgba(20,184,166,0.25)] transition-shadow duration-200 hover:shadow-[0_12px_32px_rgba(20,184,166,0.45)] hover:brightness-110"
+                className="btn-press inline-flex items-center justify-center gap-2 px-7 py-3.5 font-semibold text-white rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-strong)] transition-colors duration-[var(--dur-ui-fast)]"
               >
                 Start Free Trial
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +169,7 @@ export function HeroSection() {
 
               <Link
                 href="#demo"
-                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 font-semibold text-gray-300 rounded-xl bg-white/[0.04] border border-white/10 backdrop-blur-sm transition-all duration-200 hover:text-white hover:bg-white/[0.06]"
+                className="btn-press inline-flex items-center justify-center gap-2 px-7 py-3.5 font-semibold text-[var(--text-muted)] rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:text-[var(--text)] hover:border-[var(--border-strong)] transition-colors duration-[var(--dur-ui-fast)]"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
@@ -180,7 +183,7 @@ export function HeroSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="flex items-center gap-8 pt-8 border-t border-white/[0.07]"
+              className="flex items-center gap-8 pt-8 border-t border-[var(--border)]"
             >
               {stats.map((stat, i) => (
                 <HeroStat
@@ -204,7 +207,7 @@ export function HeroSection() {
       </div>
 
       {/* Bottom fade into next section */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#060d1a] to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--bg)] to-transparent pointer-events-none" />
     </section>
   )
 }

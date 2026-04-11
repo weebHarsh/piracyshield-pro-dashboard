@@ -8,11 +8,11 @@ const pricingTiers = [
     id: 'free',
     name: 'Free',
     price: 0,
-    description: 'Perfect for getting started',
+    description: 'For getting started',
     features: [
       '50 keywords monitored',
       '5 platforms scanned',
-      '100 incidents per month',
+      '100 incidents / month',
       'Basic analytics',
       'Email support',
     ],
@@ -24,7 +24,7 @@ const pricingTiers = [
     id: 'pro',
     name: 'Pro',
     price: 99,
-    description: 'Best for growing creators',
+    description: 'For active rights-holders',
     features: [
       'Unlimited keywords',
       'All platforms (1,000+)',
@@ -42,15 +42,14 @@ const pricingTiers = [
     id: 'enterprise',
     name: 'Enterprise',
     price: null,
-    description: 'For large organizations',
+    description: 'For studios and labels',
     features: [
       'Everything in Pro',
       'Dedicated account manager',
       'Custom integrations',
-      'White-label solution',
+      'White-label option',
       'SLA guarantees',
       'On-premise deployment',
-      '24/7 phone support',
     ],
     cta: 'Contact Sales',
     href: '#contact',
@@ -59,247 +58,193 @@ const pricingTiers = [
 ]
 
 function PriceDisplay({ price, yearly }: { price: number | null; yearly: boolean }) {
-  // Fixed outer container height so all three cards align
   if (price === null) {
     return (
       <div className="h-14 flex flex-col justify-center">
-        <div className="flex items-baseline gap-2">
-          <span className="text-4xl font-bold text-white">Custom</span>
-        </div>
-        <p className="text-xs text-gray-500 mt-1">Tailored to your scale</p>
+        <div className="tabular text-4xl font-medium text-[var(--text)]">Custom</div>
+        <p className="text-xs text-[var(--text-subtle)] mt-1">Tailored to your scale</p>
       </div>
     )
   }
   if (price === 0) {
     return (
       <div className="h-14 flex flex-col justify-center">
-        <div className="flex items-baseline gap-2">
-          <span className="text-4xl font-bold text-white">$0</span>
-          <span className="text-gray-500 text-sm">/month</span>
+        <div className="flex items-baseline gap-1.5">
+          <span className="tabular text-4xl font-medium text-[var(--text)]">$0</span>
+          <span className="text-[var(--text-subtle)] text-sm">/month</span>
         </div>
-        <p className="text-xs text-gray-500 mt-1">Free forever, no card needed</p>
+        <p className="text-xs text-[var(--text-subtle)] mt-1">Free forever, no card needed</p>
       </div>
     )
   }
 
-  const monthlyDisplay = price
-  const yearlyDisplay  = Math.round(price * 0.8)
-  const shown          = yearly ? yearlyDisplay : monthlyDisplay
+  const shown = yearly ? Math.round(price * 0.8) : price
 
   return (
     <div className="h-14 flex flex-col justify-center overflow-hidden">
-      <div className="flex items-baseline gap-2">
+      <div className="flex items-baseline gap-1.5">
         <AnimatePresence mode="wait">
           <motion.span
             key={`${shown}-price`}
-            initial={{ opacity: 0, y: 14 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -14 }}
-            transition={{ duration: 0.22 }}
-            className="text-4xl font-bold text-white tabular-nums"
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="tabular text-4xl font-medium text-[var(--text)]"
           >
             ${shown}
           </motion.span>
         </AnimatePresence>
-        <span className="text-gray-500 text-sm">/month</span>
-        {yearly && <span className="line-through text-gray-600 text-sm">${monthlyDisplay}</span>}
+        <span className="text-[var(--text-subtle)] text-sm">/month</span>
+        {yearly && <span className="line-through text-[var(--text-subtle)] text-sm">${price}</span>}
       </div>
       {yearly
-        ? <p className="text-xs text-teal-400 mt-1">Billed annually — 20% off</p>
-        : <p className="text-xs text-gray-600 mt-1">Billed monthly</p>
+        ? <p className="text-xs text-[var(--brand)] mt-1">Billed annually — 20% off</p>
+        : <p className="text-xs text-[var(--text-subtle)] mt-1">Billed monthly</p>
       }
     </div>
   )
 }
 
-function PricingCard({
-  tier,
-  index,
-  yearly,
-}: {
-  tier: typeof pricingTiers[0]
-  index: number
-  yearly: boolean
-}) {
-  const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: '-50px' })
-
-  // Center card appears first, then flanks simultaneously
-  const delay = tier.popular ? 0 : 0.12
-
+function CheckIcon() {
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-      transition={{ duration: 0.55, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="relative"
-    >
-      {/* Popular badge */}
-      {tier.popular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-          <span className="px-4 py-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-bold rounded-full shadow-lg shadow-teal-500/30">
-            Most Popular
-          </span>
-        </div>
-      )}
-
-      <div
-        className={`h-full rounded-2xl overflow-hidden card-surface-elevated ${
-          tier.popular
-            ? 'border-teal-500/45 shadow-[0_0_40px_rgba(20,184,166,0.12)]'
-            : ''
-        }`}
-      >
-        {/* Top gradient bar for popular */}
-        {tier.popular && (
-          <div className="h-px bg-gradient-to-r from-transparent via-teal-500 to-transparent" />
-        )}
-
-        <div className="p-8">
-          <h3 className="text-xl font-bold text-white mb-1">{tier.name}</h3>
-          <p className="text-sm text-gray-400 mb-6">{tier.description}</p>
-
-          <div className="mb-4">
-            <PriceDisplay price={tier.price} yearly={yearly} />
-          </div>
-
-          {/* Feature list */}
-          <ul className="space-y-3 mb-8">
-            {tier.features.map((feature, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <svg
-                  className="w-4 h-4 text-teal-400 flex-shrink-0 mt-0.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-sm text-gray-300">{feature}</span>
-              </li>
-            ))}
-          </ul>
-
-          {/* CTA */}
-          <motion.a
-            href={tier.href}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`block w-full py-3 px-6 text-center rounded-xl font-semibold transition-all ${
-              tier.popular
-                ? 'text-white'
-                : 'text-white border border-white/20 hover:border-white/40 hover:bg-white/[0.06]'
-            }`}
-            style={
-              tier.popular
-                ? {
-                    background: 'linear-gradient(135deg, #0f766e 0%, #0d9488 100%)',
-                    boxShadow: '0 0 0 1px rgba(20,184,166,0.3), 0 8px 24px rgba(20,184,166,0.25)',
-                  }
-                : { background: 'rgba(255,255,255,0.04)' }
-            }
-          >
-            {tier.cta}
-          </motion.a>
-        </div>
-      </div>
-    </motion.div>
+    <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    </svg>
   )
 }
 
 export function PricingSection() {
   const titleRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(titleRef, { once: true, margin: '-80px' })
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly')
-  const yearly = billingPeriod === 'yearly'
+  const [yearly, setYearly] = useState(false)
 
   return (
-    <section id="pricing" className="relative py-24 bg-[#060d1a]">
+    <section id="pricing" className="relative py-24 bg-[var(--bg)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section title */}
-        <div ref={titleRef} className="text-center mb-16">
+
+        {/* Section header — left-aligned */}
+        <div ref={titleRef} className="mb-12">
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
             transition={{ duration: 0.4 }}
-            className="text-teal-400 text-xs font-semibold uppercase tracking-widest mb-4"
+            className="tabular text-[var(--brand)] text-xs font-medium uppercase tracking-widest mb-3"
           >
             Pricing
           </motion.p>
 
-          <motion.h2
+          <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-3xl sm:text-4xl font-bold text-white mb-4"
+            className="flex flex-col sm:flex-row sm:items-end gap-6"
           >
-            Simple,{' '}
-            <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
-              Transparent
-            </span>{' '}
-            Pricing
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-lg text-gray-400 max-w-2xl mx-auto"
-          >
-            Choose the plan that fits your needs. All plans include a 14-day free trial.
-          </motion.p>
-
-          {/* Billing toggle */}
-          <div className="flex items-center justify-center gap-4 mt-8">
-            <span className={`text-sm transition-colors ${!yearly ? 'text-white font-medium' : 'text-gray-500'}`}>
-              Monthly
-            </span>
-            <button
-              onClick={() => setBillingPeriod(yearly ? 'monthly' : 'yearly')}
-              className="relative w-12 h-6 rounded-full transition-colors"
-              style={{
-                background: yearly ? 'rgba(20,184,166,0.3)' : 'rgba(255,255,255,0.12)',
-                border: '1px solid rgba(255,255,255,0.1)',
-              }}
-              aria-checked={yearly}
-              role="switch"
+            <h2
+              className="text-[var(--text-display-l)] font-medium text-[var(--text)] leading-[1.05] tracking-[-0.03em]"
+              style={{ fontFamily: 'var(--font-display-loaded, var(--font-sans-loaded, system-ui))' }}
             >
-              <motion.div
-                animate={{ x: yearly ? 24 : 2, y: '-50%' }}
-                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                className="absolute left-0 top-1/2 w-5 h-5 rounded-full"
-                style={{ background: yearly ? '#14b8a6' : '#fff' }}
-              />
-            </button>
-            <span className={`text-sm transition-colors ${yearly ? 'text-white font-medium' : 'text-gray-500'}`}>
-              Yearly
-              <span className="ml-1.5 text-teal-400 text-xs font-semibold">−20%</span>
-            </span>
-          </div>
+              Simple, transparent pricing.
+            </h2>
+
+            {/* Billing toggle — inline with heading on wider screens */}
+            <div className="flex items-center gap-3 pb-2">
+              <span className={`text-sm transition-colors duration-[var(--dur-ui-fast)] ${!yearly ? 'text-[var(--text)]' : 'text-[var(--text-subtle)]'}`}>
+                Monthly
+              </span>
+              <button
+                onClick={() => setYearly((v) => !v)}
+                className="relative w-12 h-6 rounded-full transition-colors duration-[var(--dur-ui-fast)] border border-[var(--border)]"
+                style={{ background: yearly ? 'var(--brand-dim)' : 'var(--surface-2)' }}
+                aria-checked={yearly}
+                role="switch"
+                aria-label="Toggle annual billing"
+              >
+                <motion.div
+                  animate={{ x: yearly ? 24 : 2, y: '-50%' }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  className="absolute left-0 top-1/2 w-4 h-4 rounded-full"
+                  style={{ background: yearly ? 'var(--brand)' : 'var(--text-muted)' }}
+                />
+              </button>
+              <span className={`text-sm transition-colors duration-[var(--dur-ui-fast)] ${yearly ? 'text-[var(--text)]' : 'text-[var(--text-subtle)]'}`}>
+                Annual
+                <span className="ml-1.5 tabular text-[var(--brand)] text-xs font-medium">−20%</span>
+              </span>
+            </div>
+          </motion.div>
         </div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
-          {pricingTiers.map((tier, index) => (
-            <PricingCard key={tier.id} tier={tier} index={index} yearly={yearly} />
-          ))}
-        </div>
-
+        {/* Comparison strip — one shared container, divide-x */}
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
-          className="text-center mt-12"
+          initial={{ opacity: 0, y: 24 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-[var(--border)] border border-[var(--border)] rounded-xl overflow-hidden"
         >
-          <p className="text-gray-500 text-sm">
-            Need help choosing?{' '}
-            <a href="#contact" className="text-teal-400 hover:text-teal-300 transition-colors">
-              Contact our sales team
-            </a>
-          </p>
+          {pricingTiers.map((tier) => (
+            <div
+              key={tier.id}
+              className={`flex flex-col p-8 bg-[var(--surface)] ${
+                tier.popular ? 'border-t-2 lg:border-t-2 border-t-[var(--brand)] lg:border-l-0' : ''
+              }`}
+            >
+              {/* Tier name + description */}
+              <div className="mb-6">
+                <div className="flex items-center gap-3 mb-1">
+                  <h3 className="text-lg font-semibold text-[var(--text)]">{tier.name}</h3>
+                  {tier.popular && (
+                    <span className="tabular text-[10px] px-2 py-0.5 rounded-full bg-[var(--brand-dim)] text-[var(--brand)] border border-[var(--brand)]/30 uppercase tracking-wide font-medium">
+                      Popular
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-[var(--text-subtle)]">{tier.description}</p>
+              </div>
+
+              {/* Price */}
+              <div className="mb-6">
+                <PriceDisplay price={tier.price} yearly={yearly} />
+              </div>
+
+              {/* CTA */}
+              <a
+                href={tier.href}
+                className={`btn-press block w-full py-2.5 px-6 text-center text-sm font-semibold rounded-lg mb-8 transition-colors duration-[var(--dur-ui-fast)] ${
+                  tier.popular
+                    ? 'bg-[var(--brand)] hover:bg-[var(--brand-strong)] text-white'
+                    : 'bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)] border border-[var(--border)]'
+                }`}
+              >
+                {tier.cta}
+              </a>
+
+              {/* Features */}
+              <ul className="space-y-3 flex-1">
+                {tier.features.map((feature, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="text-[var(--brand)]">
+                      <CheckIcon />
+                    </span>
+                    <span className="text-sm text-[var(--text-muted)]">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ delay: 0.5 }}
+          className="text-center text-[var(--text-subtle)] text-sm mt-8"
+        >
+          All plans include a 14-day free trial. No card required.{' '}
+          <a href="#contact" className="text-[var(--brand)] hover:text-[var(--brand-strong)] transition-colors duration-[var(--dur-ui-fast)]">
+            Questions? Talk to us.
+          </a>
+        </motion.p>
       </div>
     </section>
   )

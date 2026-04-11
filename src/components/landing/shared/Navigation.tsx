@@ -30,11 +30,11 @@ function NavLink({ href, label }: { href: string; label: string }) {
       onClick={handleClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="relative text-sm font-medium text-gray-300 hover:text-white transition-colors py-1"
+      className="relative text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-[var(--dur-ui-fast)] py-1"
     >
       {label}
       <motion.span
-        className="absolute bottom-0 left-0 right-0 h-px bg-teal-400 rounded-full"
+        className="absolute bottom-0 left-0 right-0 h-px bg-[var(--brand)] rounded-full"
         initial={false}
         animate={{ scaleX: hovered ? 1 : 0, opacity: hovered ? 1 : 0 }}
         transition={{ duration: 0.2 }}
@@ -88,13 +88,13 @@ export function Navigation() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -20, opacity: 0 }}
           transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-          className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-            isScrolled
-              ? 'border-b border-white/[0.07] backdrop-blur-xl'
-              : 'border-b border-transparent'
+          className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-[var(--dur-ui)] ${
+            isScrolled ? 'border-b border-[var(--border)]' : 'border-b border-transparent'
           }`}
           style={{
-            background: isScrolled ? 'rgba(15,23,42,0.85)' : 'transparent',
+            background: isScrolled ? 'oklch(0.18 0.010 210 / 0.90)' : 'transparent',
+            backdropFilter: isScrolled ? 'blur(12px)' : 'none',
+            WebkitBackdropFilter: isScrolled ? 'blur(12px)' : 'none',
           }}
           aria-label="Main navigation"
         >
@@ -102,13 +102,13 @@ export function Navigation() {
             <div className="flex justify-between items-center h-16">
 
               {/* Logo */}
-              <Link href="/" className="flex items-center space-x-2">
-                <div className="w-9 h-9 bg-gradient-to-br from-teal-600 to-teal-700 rounded-lg flex items-center justify-center shadow-lg shadow-teal-500/20">
+              <Link href="/" className="flex items-center gap-2.5">
+                <div className="w-9 h-9 bg-[var(--brand)] rounded-lg flex items-center justify-center ring-1 ring-[var(--brand-strong)]">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
                 </div>
-                <span className="text-xl font-bold text-white">PiracyShield</span>
+                <span className="text-xl font-bold text-[var(--text)] tracking-tight">PiracyShield</span>
               </Link>
 
               {/* Desktop links */}
@@ -122,13 +122,13 @@ export function Navigation() {
               <div className="hidden md:flex items-center space-x-4">
                 <Link
                   href="/login"
-                  className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
+                  className="text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-[var(--dur-ui-fast)]"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/signup"
-                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-teal-600 to-teal-700 text-white text-sm font-semibold rounded-lg shadow-[0_0_20px_rgba(20,184,166,0.2)] hover:shadow-[0_0_32px_rgba(20,184,166,0.4)] hover:from-teal-700 hover:to-teal-800 transition-all"
+                  className="btn-press inline-flex items-center px-4 py-2 bg-[var(--brand)] hover:bg-[var(--brand-strong)] text-white text-sm font-semibold rounded-lg transition-colors duration-[var(--dur-ui-fast)]"
                 >
                   Start Free Trial
                 </Link>
@@ -136,12 +136,12 @@ export function Navigation() {
 
               {/* Mobile hamburger */}
               <button
-                className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
+                className="md:hidden p-2 rounded-lg hover:bg-[var(--surface-2)] transition-colors duration-[var(--dur-ui-fast)]"
                 onClick={() => setMobileOpen((v) => !v)}
                 aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={mobileOpen}
               >
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <svg className="w-6 h-6 text-[var(--text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   {mobileOpen ? (
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   ) : (
@@ -160,45 +160,36 @@ export function Navigation() {
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="md:hidden overflow-hidden card-surface-elevated border-t border-white/[0.07]"
+                className="md:hidden overflow-hidden border-t border-[var(--border)] bg-[var(--surface)]"
               >
-                <motion.div
-                  initial="hidden"
-                  animate="visible"
-                  variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
-                  className="px-4 py-4 space-y-1"
-                >
+                <div className="px-4 py-4 space-y-1">
                   {links.map((link) => (
-                    <motion.div
+                    <a
                       key={link.href}
-                      variants={{ hidden: { opacity: 0, x: -12 }, visible: { opacity: 1, x: 0 } }}
+                      href={link.href}
+                      onClick={handleMobileClick(link.href)}
+                      className="block px-3 py-2.5 text-sm font-medium text-[var(--text-muted)] hover:text-[var(--brand)] hover:bg-[var(--surface-2)] rounded-lg transition-colors duration-[var(--dur-ui-fast)]"
                     >
-                      <a
-                        href={link.href}
-                        onClick={handleMobileClick(link.href)}
-                        className="block px-3 py-2.5 text-sm font-medium text-gray-300 hover:text-teal-400 hover:bg-white/[0.05] rounded-lg transition-colors"
-                      >
-                        {link.label}
-                      </a>
-                    </motion.div>
+                      {link.label}
+                    </a>
                   ))}
-                  <div className="pt-3 border-t border-white/[0.07] space-y-2">
+                  <div className="pt-3 border-t border-[var(--border)] space-y-2">
                     <a
                       href="/login"
                       onClick={closeMobile}
-                      className="block px-3 py-2.5 text-sm font-medium text-gray-300 hover:text-teal-400 hover:bg-white/[0.05] rounded-lg transition-colors"
+                      className="block px-3 py-2.5 text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text)] rounded-lg transition-colors duration-[var(--dur-ui-fast)]"
                     >
                       Sign In
                     </a>
                     <a
                       href="/signup"
                       onClick={closeMobile}
-                      className="block px-3 py-2.5 text-sm font-medium text-center text-white bg-gradient-to-r from-teal-600 to-teal-700 rounded-lg hover:from-teal-700 hover:to-teal-800 transition-all"
+                      className="block px-3 py-2.5 text-sm font-medium text-center text-white bg-[var(--brand)] hover:bg-[var(--brand-strong)] rounded-lg transition-colors duration-[var(--dur-ui-fast)]"
                     >
                       Start Free Trial
                     </a>
                   </div>
-                </motion.div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

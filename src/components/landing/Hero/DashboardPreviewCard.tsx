@@ -6,44 +6,41 @@ const incidents = [
   {
     platform: 'YouTube',
     initial: 'Y',
-    title: 'Full Movie — Unauthorized Upload',
+    title: 'Studio Alpha S02E04 — Pre-release Leak',
     risk: 'Critical' as const,
-    color: '#ef4444',
+    riskToken: 'var(--status-critical)',
+    riskBg: 'var(--status-critical-bg)',
   },
   {
     platform: 'Telegram',
     initial: 'T',
-    title: 'Paid Course Bundle Leaked',
+    title: 'Project Helios OST — Full Album',
     risk: 'High' as const,
-    color: '#f97316',
+    riskToken: 'var(--status-high)',
+    riskBg: 'var(--status-high-bg)',
   },
   {
     platform: 'Reddit',
     initial: 'R',
-    title: 'Ebook PDF Distribution',
+    title: 'Meridian Suite — Installer + Crack',
     risk: 'Medium' as const,
-    color: '#eab308',
+    riskToken: 'var(--status-medium)',
+    riskBg: 'var(--status-medium-bg)',
   },
   {
     platform: 'Twitter',
     initial: 'X',
     title: 'Clip Compilation — No License',
     risk: 'Low' as const,
-    color: '#22c55e',
+    riskToken: 'var(--status-low)',
+    riskBg: 'var(--status-low-bg)',
   },
 ]
 
-const riskStyle: Record<string, string> = {
-  Critical: 'bg-red-500/15 text-red-400 border border-red-500/25',
-  High:     'bg-orange-500/15 text-orange-400 border border-orange-500/25',
-  Medium:   'bg-yellow-500/15 text-yellow-400 border border-yellow-500/25',
-  Low:      'bg-green-500/15 text-green-400 border border-green-500/25',
-}
-
 const kpis = [
-  { label: 'Active',    value: '47',    color: 'text-red-400' },
-  { label: 'Resolved',  value: '1,209', color: 'text-teal-400' },
-  { label: 'Success',   value: '95%',   color: 'text-cyan-400' },
+  { label: 'Active',   value: '47',    tokenColor: 'var(--status-critical)' },
+  { label: 'Resolved', value: '1,247', tokenColor: 'var(--brand)'           },
+  { label: 'Success',  value: '94.7%', tokenColor: 'var(--brand)'           },
 ]
 
 export function DashboardPreviewCard() {
@@ -55,45 +52,42 @@ export function DashboardPreviewCard() {
       className="relative w-full max-w-md mx-auto lg:mx-0"
       style={{ perspective: '1200px' }}
     >
-      {/* Floating card */}
       <div className="relative hover:-translate-y-1 transition-transform duration-300">
 
-        {/* Glass card */}
-        <div
-          className="relative rounded-2xl overflow-hidden shadow-2xl card-surface-elevated"
-        >
-          {/* Top accent line */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-teal-500/60 to-transparent" />
+        {/* Card */}
+        <div className="relative rounded-2xl overflow-hidden card-surface shadow-2xl">
+
+          {/* Top accent line — 1px brand only */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-[var(--brand)]" style={{ opacity: 0.5 }} />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
             <div className="flex items-center gap-2.5">
-              <div className="relative">
-                <div className="w-2 h-2 rounded-full bg-teal-400" />
-                <div className="absolute inset-0 rounded-full bg-teal-400 animate-ping opacity-50" />
-              </div>
-              <span className="text-white text-sm font-semibold tracking-tight">
+              {/* Static status dot — no ping */}
+              <div className="w-2 h-2 rounded-full bg-[var(--brand)]" />
+              <span className="text-[var(--text)] text-sm font-semibold tracking-tight">
                 Threat Intelligence
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">
+              <span className="tabular text-[11px] font-medium text-[var(--text-subtle)] uppercase tracking-wider">
                 Live
               </span>
-              <div className="flex gap-1">
-                <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-              </div>
+              <div className="w-2 h-2 rounded-full bg-[var(--brand)]" />
             </div>
           </div>
 
           {/* KPI strip */}
-          <div className="grid grid-cols-3 divide-x divide-white/[0.07] border-b border-white/[0.07]">
-            {kpis.map(({ label, value, color }) => (
+          <div className="grid grid-cols-3 divide-x divide-[var(--border)] border-b border-[var(--border)]">
+            {kpis.map(({ label, value, tokenColor }) => (
               <div key={label} className="px-4 py-3 text-center">
-                <div className={`text-base font-bold tabular-nums ${color}`}>
+                <div
+                  className="tabular text-base font-medium"
+                  style={{ color: tokenColor }}
+                >
                   {value}
                 </div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">
+                <div className="text-[10px] text-[var(--text-subtle)] uppercase tracking-wider mt-0.5">
                   {label}
                 </div>
               </div>
@@ -101,22 +95,22 @@ export function DashboardPreviewCard() {
           </div>
 
           {/* Incident rows */}
-          <div className="divide-y divide-white/[0.05]">
+          <div className="divide-y divide-[var(--border)]" style={{ borderColor: 'var(--border)' }}>
             {incidents.map((inc, i) => (
               <motion.div
                 key={inc.title}
                 initial={{ opacity: 0, x: 12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.55 + i * 0.07, duration: 0.4 }}
-                className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.03] transition-colors"
+                className="flex items-center gap-3 px-5 py-3 hover:bg-[var(--surface-2)] transition-colors duration-[var(--dur-ui-fast)]"
               >
                 {/* Platform badge */}
                 <div
                   className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold"
                   style={{
-                    background: `${inc.color}18`,
-                    border: `1px solid ${inc.color}35`,
-                    color: inc.color,
+                    background: inc.riskBg,
+                    border: `1px solid ${inc.riskToken}`,
+                    color: inc.riskToken,
                   }}
                 >
                   {inc.initial}
@@ -124,15 +118,19 @@ export function DashboardPreviewCard() {
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs text-gray-100 font-medium truncate leading-tight">
+                  <div className="text-xs text-[var(--text)] font-medium truncate leading-tight">
                     {inc.title}
                   </div>
-                  <div className="text-[10px] text-gray-500 mt-0.5">{inc.platform}</div>
+                  <div className="text-[10px] text-[var(--text-subtle)] mt-0.5">{inc.platform}</div>
                 </div>
 
                 {/* Risk badge */}
                 <span
-                  className={`text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0 ${riskStyle[inc.risk]}`}
+                  className="tabular text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
+                  style={{
+                    background: inc.riskBg,
+                    color: inc.riskToken,
+                  }}
                 >
                   {inc.risk}
                 </span>
@@ -141,12 +139,12 @@ export function DashboardPreviewCard() {
           </div>
 
           {/* Footer */}
-          <div className="px-5 py-3 flex items-center justify-between bg-white/[0.03] border-t border-white/[0.05]">
+          <div className="px-5 py-3 flex items-center justify-between bg-[var(--surface-2)] border-t border-[var(--border)]">
             <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-teal-400" />
-              <span className="text-[10px] text-gray-500">Monitoring 1,000+ platforms</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--brand)]" />
+              <span className="text-[10px] text-[var(--text-subtle)]">Monitoring 1,000+ platforms</span>
             </div>
-            <span className="text-[11px] text-teal-400 font-medium cursor-pointer hover:text-teal-300 transition-colors">
+            <span className="tabular text-[11px] text-[var(--brand)] font-medium cursor-pointer hover:text-[var(--brand-strong)] transition-colors duration-[var(--dur-ui-fast)]">
               View all →
             </span>
           </div>

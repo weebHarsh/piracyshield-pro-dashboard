@@ -191,7 +191,7 @@ html {
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans-loaded, "Onest"), system-ui, -apple-system, sans-serif;
   font-size: var(--text-md);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -207,7 +207,7 @@ body {
 
 /* Tabular figures utility — apply to every numeric element */
 .tabular {
-  font-family: "PP Fraktion Mono", ui-monospace, monospace;
+  font-family: var(--font-mono-loaded, "JetBrains Mono"), ui-monospace, monospace;
   font-feature-settings: "tnum" 1, "lnum" 1;
   font-variant-numeric: tabular-nums lining-nums;
 }

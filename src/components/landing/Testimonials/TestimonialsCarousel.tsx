@@ -1,161 +1,150 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const testimonials = [
   {
     id: 1,
-    name: 'Sarah Chen',
-    role: 'Content Creator',
-    company: 'TechReview Pro',
-    quote: 'PiracyShield found hundreds of unauthorized copies of my course content in the first week and had most of them down within days. It\'s become a core part of how I protect my work.',
-    initials: 'SC',
-    rating: 5,
-  },
-  {
-    id: 2,
-    name: 'Michael Black',
-    role: 'CEO',
-    company: 'IndieFilm Studios',
-    quote: 'The automated takedown system saves us thousands in legal fees. What used to take weeks now happens in hours. Absolutely indispensable.',
-    initials: 'MB',
-    rating: 4,
-  },
-  {
-    id: 3,
-    name: 'Emma White',
-    role: 'Digital Marketing Manager',
-    company: 'Creative Agency',
-    quote: 'Real-time monitoring across 1,000+ platforms is a game-changer. We caught a piracy ring distributing our content across 50 different sites simultaneously.',
-    initials: 'EW',
-    rating: 5,
-  },
-  {
-    id: 4,
-    name: 'David Kim',
-    role: 'Founder',
-    company: 'EduTech Inc',
-    quote: 'We were losing significant revenue to piracy before PiracyShield. The difference in detected and removed content has been dramatic — highly recommended for any digital publisher.',
-    initials: 'DK',
-    rating: 4,
-  },
-  {
-    id: 5,
-    name: 'Priya Sharma',
-    role: 'Head of Content',
-    company: 'StreamVault',
-    quote: 'Onboarding took under an hour and we were monitoring live the same day. The dashboard is clean, the alerts are actionable, and the team is responsive.',
-    initials: 'PS',
-    rating: 5,
-  },
-  {
-    id: 6,
+    quote: 'The DMCA workflow is the best I\'ve seen — notices are legally sound, filed fast, and the audit trail makes enforcement cases trivial. We\'ve recommended it to every client.',
     name: 'James Okafor',
     role: 'IP Counsel',
     company: 'MediaGuard Legal',
-    quote: 'The DMCA workflow is the best I\'ve seen — notices are legally sound, filed fast, and the audit trail makes enforcement cases trivial. We\'ve recommended it to every client.',
-    initials: 'JO',
-    rating: 5,
+  },
+  {
+    id: 2,
+    quote: 'Onboarding took under an hour and we were monitoring live the same day. The dashboard is precise, the alerts are actionable, and it hasn\'t missed a single incident in six months.',
+    name: 'Priya Ramaswamy',
+    role: 'VP Content Protection',
+    company: 'StreamVault',
+  },
+  {
+    id: 3,
+    quote: 'We were losing significant revenue to piracy before switching. Detected and removed 1,200 infringing copies in the first quarter — mostly automated, no manual review required.',
+    name: 'Marcus Chen',
+    role: 'Rights Operations Lead',
+    company: 'Atlas Distribution',
   },
 ]
 
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex gap-1 mb-4">
-      {[...Array(5)].map((_, i) => (
-        <svg
-          key={i}
-          className={`w-4 h-4 ${i < rating ? 'text-yellow-400' : 'text-gray-700'}`}
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ))}
-    </div>
-  )
-}
-
-function TestimonialCard({ testimonial, index }: { testimonial: typeof testimonials[0]; index: number }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: '-60px' })
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 24 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-      transition={{ duration: 0.55, delay: index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-    >
-      <div className="card-surface-elevated h-full rounded-2xl p-7 transition-colors duration-300 hover:border-teal-500/30">
-        <StarRating rating={testimonial.rating} />
-
-        <blockquote className="text-gray-300 text-sm leading-relaxed mb-6">
-          &ldquo;{testimonial.quote}&rdquo;
-        </blockquote>
-
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 bg-gradient-to-br from-teal-500 to-cyan-500">
-            {testimonial.initials}
-          </div>
-          <div>
-            <div className="text-sm font-semibold text-white">{testimonial.name}</div>
-            <div className="text-xs text-gray-500">{testimonial.role} · {testimonial.company}</div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
 export function TestimonialsCarousel() {
-  const titleRef = useRef<HTMLDivElement>(null)
-  const isInView = useInView(titleRef, { once: true, margin: '-80px' })
+  const [current, setCurrent] = useState(0)
+
+  const prev = () => setCurrent((c) => (c - 1 + testimonials.length) % testimonials.length)
+  const next = () => setCurrent((c) => (c + 1) % testimonials.length)
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft')  prev()
+      if (e.key === 'ArrowRight') next()
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
+  const t = testimonials[current]
 
   return (
-    <section id="testimonials" className="relative py-24 bg-[#060d1a]">
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section title */}
-        <div ref={titleRef} className="text-center mb-16">
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
-            transition={{ duration: 0.4 }}
-            className="text-teal-400 text-xs font-semibold uppercase tracking-widest mb-4"
-          >
-            Social Proof
-          </motion.p>
+    <section id="testimonials" className="relative py-24 bg-[var(--bg)] border-y border-[var(--border)]">
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-3xl sm:text-4xl font-bold text-white mb-4"
-          >
-            Trusted by{' '}
-            <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
-              Content Creators
-            </span>{' '}
-            Worldwide
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-            className="text-lg text-gray-400 max-w-2xl mx-auto"
-          >
-            See how PiracyShield helps creators protect their content and revenue.
-          </motion.p>
+        {/* Opening mark */}
+        <div
+          className="text-[var(--brand)] mb-6 select-none"
+          style={{ fontFamily: 'var(--font-display-loaded, var(--font-sans-loaded, system-ui))', fontSize: 'clamp(3rem, 5vw, 5rem)', lineHeight: 1, opacity: 0.35 }}
+          aria-hidden="true"
+        >
+          &ldquo;
         </div>
 
-        {/* 3-col grid on desktop, 2-col tablet, 1-col mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {testimonials.map((testimonial, index) => (
-            <TestimonialCard key={testimonial.id} testimonial={testimonial} index={index} />
-          ))}
+        {/* Quote — display font, large */}
+        <div className="relative min-h-[7rem]">
+          <AnimatePresence mode="wait">
+            <motion.blockquote
+              key={t.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.32, ease: [0.23, 1, 0.32, 1] }}
+              className="text-[var(--text)] leading-[1.25] tracking-[-0.02em]"
+              style={{
+                fontFamily: 'var(--font-display-loaded, var(--font-sans-loaded, system-ui))',
+                fontSize: 'clamp(1.75rem, 2vw + 1rem, 2.75rem)',
+                fontStyle: 'italic',
+              }}
+            >
+              {t.quote}
+            </motion.blockquote>
+          </AnimatePresence>
         </div>
+
+        {/* Attribution */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`attr-${t.id}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="mt-8 flex items-center gap-6"
+          >
+            <div>
+              <div
+                className="text-sm font-medium text-[var(--text)] uppercase tracking-[0.08em]"
+                style={{ fontVariant: 'small-caps' }}
+              >
+                {t.name}
+              </div>
+              <div className="text-xs text-[var(--text-subtle)] mt-0.5">
+                {t.role} · {t.company}
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Navigation row */}
+        <div className="mt-10 flex items-center justify-between">
+
+          {/* Indicator */}
+          <div className="flex items-center gap-1 tabular text-xs text-[var(--text-subtle)]">
+            {testimonials.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                className={`transition-colors duration-[var(--dur-ui-fast)] ${i === current ? 'text-[var(--brand)]' : 'text-[var(--text-subtle)] hover:text-[var(--text-muted)]'}`}
+                aria-label={`Go to testimonial ${i + 1}`}
+              >
+                {String(i + 1).padStart(1, '0')}
+                {i < testimonials.length - 1 && <span className="mx-1.5 text-[var(--border)]">·</span>}
+              </button>
+            ))}
+          </div>
+
+          {/* Prev / Next */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={prev}
+              className="btn-press w-9 h-9 rounded-lg border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--border-strong)] transition-colors duration-[var(--dur-ui-fast)]"
+              aria-label="Previous testimonial"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={next}
+              className="btn-press w-9 h-9 rounded-lg border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--border-strong)] transition-colors duration-[var(--dur-ui-fast)]"
+              aria-label="Next testimonial"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+        </div>
+
       </div>
     </section>
   )
