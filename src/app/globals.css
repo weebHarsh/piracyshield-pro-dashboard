@@ -1,88 +1,278 @@
 @import "tailwindcss";
 
-/* ─── Brand Color Variables ─────────────────────────────────────────────── */
-:root {
-  /* Primary Teal */
-  --primary-teal: #0f766e;
-  --primary-teal-light: #14b8a6;
-  --primary-teal-lighter: #5eead4;
-  --primary-teal-dark: #0d5e56;
-  --primary-teal-darker: #134e4a;
+/* ─── PP Font Faces ─────────────────────────────────────────────────────── */
+/* See public/fonts/DOWNLOAD_FONTS.md — fallback to system fonts if missing */
 
-  /* Status Colors (semantic — used in incident/risk UI) */
-  --status-critical: #dc2626;
-  --status-high: #ea580c;
-  --status-medium: #d97706;
-  --status-low: #65a30d;
-  --status-resolved: #16a34a;
-
-  /* ─── Landing Design Tokens ─── */
-  --surface-page: #060d1a;
-  --surface-card: rgba(255,255,255,0.03);
-  --surface-elevated: rgba(15,23,42,0.85);
-  --border-subtle: rgba(255,255,255,0.07);
-  --border-hover: rgba(255,255,255,0.14);
-  --border-accent: rgba(20,184,166,0.3);
+@font-face {
+  font-family: "PP Editorial New";
+  src: url("/fonts/pp-editorial-new/PPEditorialNew-Ultralight.woff2") format("woff2");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "PP Editorial New";
+  src: url("/fonts/pp-editorial-new/PPEditorialNew-UltralightItalic.woff2") format("woff2");
+  font-weight: 200;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "PP Editorial New";
+  src: url("/fonts/pp-editorial-new/PPEditorialNew-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
 }
 
+@font-face {
+  font-family: "PP Neue Montreal";
+  src: url("/fonts/pp-neue-montreal/PPNeueMontreal-Book.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "PP Neue Montreal";
+  src: url("/fonts/pp-neue-montreal/PPNeueMontreal-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "PP Neue Montreal";
+  src: url("/fonts/pp-neue-montreal/PPNeueMontreal-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "PP Fraktion Mono";
+  src: url("/fonts/pp-fraktion-mono/PPFraktionMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "PP Fraktion Mono";
+  src: url("/fonts/pp-fraktion-mono/PPFraktionMono-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─── Design Tokens ─────────────────────────────────────────────────────── */
+:root {
+  /* ── Brand — one accent ── */
+  --brand:        oklch(0.62 0.14 185);
+  --brand-strong: oklch(0.55 0.17 185);
+  --brand-soft:   oklch(0.92 0.04 185);
+  --brand-dim:    oklch(0.62 0.14 185 / 0.15);
+
+  /* ── Neutrals — tinted 0.01 chroma toward 210 (subtle teal lean) ── */
+  --bg:            oklch(0.16 0.012 215);
+  --surface:       oklch(0.20 0.010 210);
+  --surface-2:     oklch(0.24 0.008 205);
+  --surface-3:     oklch(0.28 0.006 205);
+  --border:        oklch(0.32 0.008 205);
+  --border-strong: oklch(0.42 0.010 205);
+  --text:          oklch(0.96 0.004 200);
+  --text-muted:    oklch(0.74 0.008 205);
+  --text-subtle:   oklch(0.52 0.010 205);
+
+  /* ── Canonical status palette — shared by badges, charts, toasts ── */
+  --status-critical:    oklch(0.62 0.18 28);
+  --status-critical-bg: oklch(0.62 0.18 28 / 0.12);
+  --status-high:        oklch(0.72 0.15 55);
+  --status-high-bg:     oklch(0.72 0.15 55 / 0.12);
+  --status-medium:      oklch(0.80 0.12 90);
+  --status-medium-bg:   oklch(0.80 0.12 90 / 0.12);
+  --status-low:         oklch(0.70 0.12 165);
+  --status-low-bg:      oklch(0.70 0.12 165 / 0.12);
+  --status-info:        oklch(0.68 0.13 240);
+  --status-info-bg:     oklch(0.68 0.13 240 / 0.12);
+
+  /* ── Easing curves ── */
+  --ease-out:       cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out:    cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer:    cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* ── Duration tokens ── */
+  --dur-press:   160ms;
+  --dur-ui-fast: 150ms;
+  --dur-ui:      200ms;
+  --dur-enter:   320ms;
+  --dur-landing: 480ms;
+}
+
+/* ── Landing dialect: generous spacing + motion ── */
+[data-surface="landing"] {
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-4xl: 96px;
+
+  --motion-entrance: var(--dur-landing);
+  --motion-route:    var(--dur-enter);
+
+  /* ── Type scale: fluid display ── */
+  --text-display-xl: clamp(3rem, 7vw + 1rem, 7rem);
+  --text-display-l:  clamp(2.25rem, 4vw + 1rem, 4.5rem);
+  --text-display-m:  clamp(1.5rem, 1.5vw + 1rem, 2rem);
+}
+
+/* ── Dashboard dialect: tight spacing + instant motion ── */
+[data-surface="dashboard"] {
+  --space-xs:  4px;
+  --space-sm:  6px;
+  --space-md:  12px;
+  --space-lg:  16px;
+  --space-xl:  20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+  --space-4xl: 48px;
+
+  --motion-entrance: var(--dur-ui);
+  --motion-route:    var(--dur-ui-fast);
+}
+
+/* ── Fixed-rem scale (dashboard + body copy, both surfaces) ── */
+:root {
+  --text-3xl: 1.875rem;
+  --text-2xl: 1.5rem;
+  --text-xl:  1.25rem;
+  --text-lg:  1.0625rem;
+  --text-md:  0.9375rem;
+  --text-sm:  0.8125rem;
+  --text-xs:  0.75rem;
+}
+
+/* ── Reduced-motion override ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:       0.01ms !important;
+    animation-iteration-count: 1    !important;
+    transition-duration:      0.01ms !important;
+    scroll-behavior: auto           !important;
+  }
+}
+
+/* ─── @theme (Tailwind v4 CSS-vars bridge) ────────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-heading: "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
+  --color-bg:            var(--bg);
+  --color-surface:       var(--surface);
+  --color-surface-2:     var(--surface-2);
+  --color-surface-3:     var(--surface-3);
+  --color-border:        var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text:          var(--text);
+  --color-text-muted:    var(--text-muted);
+  --color-text-subtle:   var(--text-subtle);
+  --color-brand:         var(--brand);
+  --color-brand-strong:  var(--brand-strong);
+  --color-brand-soft:    var(--brand-soft);
+
+  --font-sans:     "PP Neue Montreal", system-ui, -apple-system, sans-serif;
+  --font-display:  "PP Editorial New", "PP Neue Montreal", system-ui, sans-serif;
+  --font-mono:     "PP Fraktion Mono", ui-monospace, "Cascadia Code", monospace;
 }
 
 /* ─── Base ──────────────────────────────────────────────────────────────── */
+html {
+  background: var(--bg);
+  color: var(--text);
+}
+
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 1rem;
-  line-height: 1.6;
+  font-family: "PP Neue Montreal", system-ui, -apple-system, sans-serif;
+  font-size: var(--text-md);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-}
-
-/* Focus States for Accessibility */
+/* Focus — brand ring, no browser default */
 :focus-visible {
-  outline: 2px solid var(--primary-teal);
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
+  border-radius: 2px;
 }
 
-/* ─── Landing Utilities ─────────────────────────────────────────────────── */
-
-/* Shared card surfaces — eliminates inline rgba() repetition */
-.card-surface {
-  background: var(--surface-card);
-  border: 1px solid var(--border-subtle);
+/* Tabular figures utility — apply to every numeric element */
+.tabular {
+  font-family: "PP Fraktion Mono", ui-monospace, monospace;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
-.card-surface-elevated {
-  background: var(--surface-elevated);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-subtle);
+/* Prose cap */
+.prose { max-width: 65ch; }
+
+/* ─── Surface primitives ─────────────────────────────────────────────────
+   Used by Surface.tsx — also available as utility classes for one-off use */
+
+.surface-flat {
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
-.card-surface-elevated:hover,
-.card-surface:hover {
-  border-color: var(--border-hover);
+.surface-raised {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 40px -20px oklch(0 0 0 / 0.4);
 }
 
-/* Hero dot grid background */
+.surface-inset {
+  background: var(--surface-2);
+}
+
+/* ─── Button press feedback ──────────────────────────────────────────────── */
+.btn-press {
+  transition: transform var(--dur-press) var(--ease-out),
+              background-color var(--dur-ui-fast) var(--ease-out),
+              border-color var(--dur-ui-fast) var(--ease-out);
+}
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* ─── Landing-specific utilities ─────────────────────────────────────────── */
+
+/* Hero dot grid */
 .hero-dot-grid {
-  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+  background-image: radial-gradient(
+    circle,
+    oklch(0.74 0.008 205 / 0.10) 1px,
+    transparent 1px
+  );
   background-size: 28px 28px;
 }
 
-/* Gradient text utility */
-.text-gradient {
-  background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* One radial glow — landing hero background only */
+.hero-glow {
+  background: radial-gradient(
+    ellipse 80% 50% at 50% -10%,
+    oklch(0.62 0.04 185 / 0.18),
+    transparent 70%
+  );
+}
+
+/* Card surfaces — landing cards */
+.card-surface {
+  background: oklch(0.20 0.010 210 / 0.6);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.card-surface:hover {
+  border-color: var(--border-strong);
 }
 
 /* Scroll margin for nav offset */
@@ -90,13 +280,13 @@ h1, h2, h3, h4, h5, h6 {
   scroll-margin-top: 5rem;
 }
 
-/* Skip link for accessibility — handled via Tailwind sr-only in component */
+/* Skip link */
 .skip-link {
   position: absolute;
   top: -40px;
   left: 0;
-  background: var(--primary-teal);
-  color: white;
+  background: var(--brand);
+  color: var(--text);
   padding: 8px;
   z-index: 100;
   text-decoration: none;

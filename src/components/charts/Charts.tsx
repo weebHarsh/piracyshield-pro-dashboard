@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import type { EChartsOption } from 'echarts';
+import { getStatusColor } from '@/lib/status';
 
 interface BaseChartProps {
   id: string;
@@ -10,6 +11,32 @@ interface BaseChartProps {
   className?: string;
   'aria-label'?: string;
 }
+
+// ── Token reader — called at chart-init time on the client ──
+function token(name: string, fallback: string): string {
+  if (typeof window === 'undefined') return fallback;
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+}
+
+function chartColors() {
+  return {
+    brand:       token('--brand',        '#3daa88'),
+    brandStrong: token('--brand-strong', '#2d8a6e'),
+    border:      token('--border',       '#2e3240'),
+    textMuted:   token('--text-muted',   '#8a919e'),
+    textSubtle:  token('--text-subtle',  '#566070'),
+    surface:     token('--surface',      '#1e2230'),
+    surface2:    token('--surface-2',    '#252a3a'),
+    critical:    getStatusColor('critical'),
+    high:        getStatusColor('high'),
+    medium:      getStatusColor('medium'),
+    low:         getStatusColor('low'),
+    info:        getStatusColor('info'),
+  };
+}
+
+const MONO_FONT = '"PP Fraktion Mono", ui-monospace, monospace';
+const SANS_FONT = '"PP Neue Montreal", system-ui, sans-serif';
 
 export function useChart<T extends HTMLElement>(option: EChartsOption, deps: React.DependencyList = []) {
   const chartRef = useRef<T>(null);
@@ -19,7 +46,7 @@ export function useChart<T extends HTMLElement>(option: EChartsOption, deps: Rea
     if (!chartRef.current) return;
 
     if (!chartInstance.current) {
-      chartInstance.current = echarts.init(chartRef.current);
+      chartInstance.current = echarts.init(chartRef.current, null, { renderer: 'svg' });
     }
 
     chartInstance.current.setOption(option);
@@ -27,13 +54,10 @@ export function useChart<T extends HTMLElement>(option: EChartsOption, deps: Rea
     let resizeTimer: ReturnType<typeof setTimeout>;
     const handleResize = () => {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        chartInstance.current?.resize();
-      }, 200);
+      resizeTimer = setTimeout(() => { chartInstance.current?.resize(); }, 150);
     };
 
     window.addEventListener('resize', handleResize);
-
     return () => {
       clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
@@ -45,107 +69,67 @@ export function useChart<T extends HTMLElement>(option: EChartsOption, deps: Rea
   return chartRef;
 }
 
-const chartTheme = {
-  color: ['#14b8a6', '#f59e0b', '#e11d48', '#10b981'],
-  backgroundColor: 'transparent',
-  textStyle: {
-    fontFamily: 'Inter, sans-serif',
-    color: '#475569',
-  },
-  title: {
-    textStyle: {
-      fontFamily: 'Poppins, sans-serif',
-      color: '#0f766e',
-      fontWeight: 600,
-    },
-  },
-};
+// Shared style helpers — built once per chart mount
+function tooltipStyle(c: ReturnType<typeof chartColors>) {
+  return {
+    backgroundColor: c.surface2,
+    borderColor: c.border,
+    borderWidth: 1,
+    textStyle: { color: c.textMuted, fontFamily: SANS_FONT, fontSize: 12 },
+    extraCssText: 'box-shadow: 0 8px 24px -8px rgba(0,0,0,0.5)',
+  };
+}
 
-echarts.registerTheme('piracyshield', chartTheme);
+function axisLabelStyle(c: ReturnType<typeof chartColors>) {
+  return { color: c.textSubtle, fontFamily: MONO_FONT, fontSize: 11 };
+}
+
+function splitLineStyle(c: ReturnType<typeof chartColors>) {
+  return { lineStyle: { color: c.border, type: 'dashed' as const } };
+}
 
 export function LineChart({ id, title, className, 'aria-label': ariaLabel }: BaseChartProps) {
+  const c = chartColors();
+
   const chartRef = useChart<HTMLDivElement>(
     {
-      title: {
-        text: title || '',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 600,
-        },
-      },
-      tooltip: {
-        trigger: 'axis',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        borderColor: '#e5e7eb',
-        borderWidth: 1,
-        textStyle: {
-          color: '#374151',
-        },
-      },
+      animation: true,
+      animationDuration: 200,
+      backgroundColor: 'transparent',
+      tooltip: { trigger: 'axis', ...tooltipStyle(c) },
       legend: {
-        bottom: 10,
-        textStyle: {
-          color: '#6b7280',
-        },
+        bottom: 8,
+        textStyle: { color: c.textMuted, fontFamily: SANS_FONT, fontSize: 12 },
       },
       grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '15%',
-        top: title ? '20%' : '10%',
+        left: '2%', right: '3%', bottom: '18%',
+        top: title ? '18%' : '8%',
         containLabel: true,
       },
       xAxis: {
         type: 'category',
         boundaryGap: false,
         data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        axisLine: {
-          lineStyle: {
-            color: '#d1d5db',
-          },
-        },
-        axisLabel: {
-          color: '#6b7280',
-        },
+        axisLine: { lineStyle: { color: c.border } },
+        axisLabel: axisLabelStyle(c),
+        axisTick: { show: false },
       },
       yAxis: {
         type: 'value',
-        axisLine: {
-          show: false,
-        },
-        axisLabel: {
-          color: '#6b7280',
-        },
-        splitLine: {
-          lineStyle: {
-            color: '#e5e7eb',
-            type: 'dashed',
-          },
-        },
+        axisLine: { show: false },
+        axisLabel: axisLabelStyle(c),
+        splitLine: splitLineStyle(c),
       },
       series: [
         {
           name: 'Detections',
           type: 'line',
           smooth: true,
-          lineStyle: {
-            width: 3,
-            color: '#14b8a6',
-          },
+          symbol: 'none',
+          lineStyle: { width: 2, color: c.brand },
           areaStyle: {
-            color: {
-              type: 'linear',
-              x: 0,
-              y: 0,
-              x2: 0,
-              y2: 1,
-              colorStops: [
-                { offset: 0, color: 'rgba(20, 184, 166, 0.3)' },
-                { offset: 1, color: 'rgba(20, 184, 166, 0)' },
-              ],
-            },
+            color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [{ offset: 0, color: c.brand + '30' }, { offset: 1, color: c.brand + '00' }] },
           },
           data: [132, 145, 128, 167, 142, 165, 178],
         },
@@ -153,22 +137,11 @@ export function LineChart({ id, title, className, 'aria-label': ariaLabel }: Bas
           name: 'Takedowns',
           type: 'line',
           smooth: true,
-          lineStyle: {
-            width: 3,
-            color: '#f59e0b',
-          },
+          symbol: 'none',
+          lineStyle: { width: 2, color: c.high },
           areaStyle: {
-            color: {
-              type: 'linear',
-              x: 0,
-              y: 0,
-              x2: 0,
-              y2: 1,
-              colorStops: [
-                { offset: 0, color: 'rgba(245, 158, 11, 0.3)' },
-                { offset: 1, color: 'rgba(245, 158, 11, 0)' },
-              ],
-            },
+            color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [{ offset: 0, color: c.high + '30' }, { offset: 1, color: c.high + '00' }] },
           },
           data: [45, 52, 38, 61, 48, 55, 62],
         },
@@ -181,77 +154,54 @@ export function LineChart({ id, title, className, 'aria-label': ariaLabel }: Bas
     <div
       ref={chartRef}
       id={id}
-      className={className || 'h-80 w-full'}
+      className={className ?? 'h-64 w-full'}
       role="img"
-      aria-label={ariaLabel || title || 'Line chart showing detections and takedowns over time'}
+      aria-label={ariaLabel ?? title ?? 'Line chart showing detections and takedowns over time'}
     />
   );
 }
 
 export function PieChart({ id, title, className, 'aria-label': ariaLabel }: BaseChartProps) {
+  const c = chartColors();
+
   const chartRef = useChart<HTMLDivElement>(
     {
-      title: {
-        text: title || '',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 600,
-        },
-      },
+      animation: true,
+      animationDuration: 200,
+      backgroundColor: 'transparent',
       tooltip: {
         trigger: 'item',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        borderColor: '#e5e7eb',
-        borderWidth: 1,
-        textStyle: {
-          color: '#374151',
-        },
+        ...tooltipStyle(c),
         formatter: '{b}: {c} ({d}%)',
       },
       legend: {
-        bottom: 10,
-        textStyle: {
-          color: '#6b7280',
-        },
+        bottom: 8,
+        textStyle: { color: c.textMuted, fontFamily: SANS_FONT, fontSize: 12 },
       },
+      color: [c.brand, c.high, c.info, c.medium, c.low],
       series: [
         {
           type: 'pie',
-          radius: ['40%', '70%'],
-          center: ['50%', '55%'],
+          radius: ['38%', '68%'],
+          center: ['50%', '52%'],
           avoidLabelOverlap: false,
           itemStyle: {
-            borderRadius: 8,
-            borderColor: '#fff',
+            borderRadius: 6,
+            borderColor: c.surface,
             borderWidth: 2,
           },
-          label: {
-            show: false,
-            position: 'center',
-          },
+          label: { show: false },
           emphasis: {
-            label: {
-              show: true,
-              fontSize: 16,
-              fontWeight: 'bold',
-            },
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.3)',
-            },
+            label: { show: true, fontSize: 14, fontFamily: MONO_FONT, color: c.textMuted },
+            itemStyle: { shadowBlur: 8, shadowColor: 'rgba(0,0,0,0.3)' },
           },
-          labelLine: {
-            show: false,
-          },
+          labelLine: { show: false },
           data: [
-            { value: 1048, name: 'Movies' },
+            { value: 1048, name: 'Video' },
             { value: 735, name: 'Music' },
             { value: 580, name: 'Software' },
             { value: 484, name: 'Games' },
-            { value: 300, name: 'Books' },
+            { value: 300, name: 'Other' },
           ],
         },
       ],
@@ -263,70 +213,39 @@ export function PieChart({ id, title, className, 'aria-label': ariaLabel }: Base
     <div
       ref={chartRef}
       id={id}
-      className={className || 'h-80 w-full'}
+      className={className ?? 'h-64 w-full'}
       role="img"
-      aria-label={ariaLabel || title || 'Pie chart showing content distribution'}
+      aria-label={ariaLabel ?? title ?? 'Pie chart showing content distribution by type'}
     />
   );
 }
 
 export function BarChart({ id, title, className, 'aria-label': ariaLabel }: BaseChartProps) {
+  const c = chartColors();
+
   const chartRef = useChart<HTMLDivElement>(
     {
-      title: {
-        text: title || '',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 600,
-        },
-      },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'shadow',
-        },
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        borderColor: '#e5e7eb',
-        borderWidth: 1,
-        textStyle: {
-          color: '#374151',
-        },
-      },
+      animation: true,
+      animationDuration: 200,
+      backgroundColor: 'transparent',
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, ...tooltipStyle(c) },
       grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        top: title ? '20%' : '10%',
+        left: '2%', right: '3%', bottom: '3%',
+        top: title ? '18%' : '8%',
         containLabel: true,
       },
       xAxis: {
         type: 'value',
-        axisLine: {
-          show: false,
-        },
-        axisLabel: {
-          color: '#6b7280',
-        },
-        splitLine: {
-          lineStyle: {
-            color: '#e5e7eb',
-            type: 'dashed',
-          },
-        },
+        axisLine: { show: false },
+        axisLabel: axisLabelStyle(c),
+        splitLine: splitLineStyle(c),
       },
       yAxis: {
         type: 'category',
-        data: ['Netflix', 'YouTube', 'Twitter', 'Facebook', 'Instagram'],
-        axisLine: {
-          lineStyle: {
-            color: '#d1d5db',
-          },
-        },
-        axisLabel: {
-          color: '#6b7280',
-        },
+        data: ['YouTube', 'Twitter', 'Facebook', 'Instagram', 'Other'],
+        axisLine: { lineStyle: { color: c.border } },
+        axisLabel: { ...axisLabelStyle(c), fontFamily: SANS_FONT },
+        axisTick: { show: false },
       },
       series: [
         {
@@ -334,31 +253,11 @@ export function BarChart({ id, title, className, 'aria-label': ariaLabel }: Base
           data: [287, 198, 142, 121, 98],
           itemStyle: {
             borderRadius: [0, 4, 4, 0],
-            color: {
-              type: 'linear',
-              x: 0,
-              y: 0,
-              x2: 1,
-              y2: 0,
+            color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
               colorStops: [
-                { offset: 0, color: '#0d9488' },
-                { offset: 1, color: '#14b8a6' },
+                { offset: 0, color: c.brandStrong },
+                { offset: 1, color: c.brand },
               ],
-            },
-          },
-          emphasis: {
-            itemStyle: {
-              color: {
-                type: 'linear',
-                x: 0,
-                y: 0,
-                x2: 1,
-                y2: 0,
-                colorStops: [
-                  { offset: 0, color: '#0f766e' },
-                  { offset: 1, color: '#10b981' },
-                ],
-              },
             },
           },
         },
@@ -371,50 +270,39 @@ export function BarChart({ id, title, className, 'aria-label': ariaLabel }: Base
     <div
       ref={chartRef}
       id={id}
-      className={className || 'h-80 w-full'}
+      className={className ?? 'h-64 w-full'}
       role="img"
-      aria-label={ariaLabel || title || 'Bar chart showing platform performance'}
+      aria-label={ariaLabel ?? title ?? 'Bar chart showing incident volume by platform'}
     />
   );
 }
 
 export function DonutChart({ id, title, className, 'aria-label': ariaLabel }: BaseChartProps) {
+  const c = chartColors();
+
   const chartRef = useChart<HTMLDivElement>(
     {
-      title: {
-        text: title || '',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          fontSize: 16,
-          fontWeight: 600,
-        },
-      },
+      animation: true,
+      animationDuration: 200,
+      backgroundColor: 'transparent',
       tooltip: {
         trigger: 'item',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        borderColor: '#e5e7eb',
-        borderWidth: 1,
-        textStyle: {
-          color: '#374151',
-        },
+        ...tooltipStyle(c),
         formatter: '{b}: {c} ({d}%)',
       },
       legend: {
-        bottom: 10,
-        textStyle: {
-          color: '#6b7280',
-        },
+        bottom: 8,
+        textStyle: { color: c.textMuted, fontFamily: SANS_FONT, fontSize: 12 },
       },
       series: [
         {
           type: 'pie',
-          radius: ['50%', '70%'],
-          center: ['50%', '55%'],
+          radius: ['48%', '68%'],
+          center: ['50%', '52%'],
           avoidLabelOverlap: false,
           itemStyle: {
-            borderRadius: 10,
-            borderColor: '#fff',
+            borderRadius: 8,
+            borderColor: c.surface,
             borderWidth: 2,
           },
           label: {
@@ -423,33 +311,29 @@ export function DonutChart({ id, title, className, 'aria-label': ariaLabel }: Ba
             formatter: '{total|Total}\n{value|846}',
             rich: {
               total: {
-                fontSize: 14,
-                fontWeight: 'normal',
-                color: '#6b7280',
-                padding: [0, 0, 5, 0],
+                fontSize: 11,
+                fontFamily: SANS_FONT,
+                color: c.textSubtle,
+                padding: [0, 0, 4, 0] as [number, number, number, number],
               },
               value: {
-                fontSize: 28,
-                fontWeight: 'bold',
-                color: '#0f766e',
+                fontSize: 22,
+                fontFamily: MONO_FONT,
+                fontWeight: 500 as const,
+                color: c.textMuted,
               },
             },
           },
           emphasis: {
-            label: {
-              show: true,
-              fontSize: 16,
-              fontWeight: 'bold',
-            },
+            label: { show: true, fontSize: 13, fontFamily: MONO_FONT },
           },
-          labelLine: {
-            show: false,
-          },
+          labelLine: { show: false },
+          // Canonical status colors — matches incidents table and takedowns badges
           data: [
-            { value: 156, name: 'Critical', itemStyle: { color: '#dc2626' } },
-            { value: 287, name: 'High', itemStyle: { color: '#ea580c' } },
-            { value: 245, name: 'Medium', itemStyle: { color: '#d97706' } },
-            { value: 158, name: 'Low', itemStyle: { color: '#65a30d' } },
+            { value: 156, name: 'Critical', itemStyle: { color: c.critical } },
+            { value: 287, name: 'High',     itemStyle: { color: c.high } },
+            { value: 245, name: 'Medium',   itemStyle: { color: c.medium } },
+            { value: 158, name: 'Low',      itemStyle: { color: c.low } },
           ],
         },
       ],
@@ -461,9 +345,9 @@ export function DonutChart({ id, title, className, 'aria-label': ariaLabel }: Ba
     <div
       ref={chartRef}
       id={id}
-      className={className || 'h-80 w-full'}
+      className={className ?? 'h-64 w-full'}
       role="img"
-      aria-label={ariaLabel || title || 'Donut chart showing risk distribution'}
+      aria-label={ariaLabel ?? title ?? 'Donut chart showing risk distribution'}
     />
   );
 }

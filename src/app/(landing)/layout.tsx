@@ -35,10 +35,12 @@ export default function LandingLayout({
       >
         Skip to main content
       </a>
-      <ScrollProgress />
-      <Navigation />
-      <main id="main-content">{children}</main>
-      <Footer />
+      <div data-surface="landing" className="flex flex-col min-h-[100dvh]">
+        <ScrollProgress />
+        <Navigation />
+        <main id="main-content">{children}</main>
+        <Footer />
+      </div>
     </>
   )
 }

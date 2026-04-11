@@ -21,11 +21,11 @@ export interface ModalProps {
 }
 
 const sizeStyles = {
-  sm: 'max-w-md',
-  md: 'max-w-lg',
-  lg: 'max-w-2xl',
-  xl: 'max-w-4xl',
-  '2xl': 'max-w-6xl',
+  sm:   'max-w-md',
+  md:   'max-w-lg',
+  lg:   'max-w-2xl',
+  xl:   'max-w-4xl',
+  '2xl':'max-w-6xl',
   full: 'max-w-full mx-4',
 };
 
@@ -51,28 +51,17 @@ export function Modal({
 
   const handleOverlayClick = useCallback(
     (e: React.MouseEvent) => {
-      if (closeOnOverlayClick && e.target === e.currentTarget) {
-        onClose();
-      }
+      if (closeOnOverlayClick && e.target === e.currentTarget) onClose();
     },
     [closeOnOverlayClick, onClose]
   );
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('modal-open');
-    } else {
-      document.body.classList.remove('modal-open');
-    }
-
-    return () => {
-      document.body.classList.remove('modal-open');
-    };
+    document.body.classList.toggle('modal-open', isOpen);
+    return () => { document.body.classList.remove('modal-open'); };
   }, [isOpen]);
 
-  if (typeof window === 'undefined') {
-    return null;
-  }
+  if (typeof window === 'undefined') return null;
 
   return createPortal(
     <AnimatePresence>
@@ -84,80 +73,74 @@ export function Modal({
           aria-labelledby={ariaLabelledBy || titleId.current}
           aria-describedby={ariaDescribedBy || (description ? descriptionId.current : undefined)}
         >
+          {/* Backdrop — no blur, solid dark */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 bg-[oklch(0_0_0_/_0.6)]"
             onClick={handleOverlayClick}
             aria-hidden="true"
           />
 
+          {/* Panel — scale from 0.96, center-anchored */}
           <motion.div
             ref={modalRef}
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            className={`
-              relative w-full ${sizeStyles[size]}
-              bg-white rounded-2xl shadow-2xl
-              max-h-[90vh] overflow-hidden flex flex-col
-            `}
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            style={{ transformOrigin: 'center' }}
+            className={[
+              'relative w-full z-10',
+              sizeStyles[size],
+              'bg-[var(--surface)] border border-[var(--border)]',
+              'rounded-xl shadow-[0_32px_64px_-16px_oklch(0_0_0_/_0.5)]',
+              'max-h-[90vh] overflow-hidden flex flex-col',
+            ].join(' ')}
           >
-            <div className="px-6 py-4 border-b border-slate-200">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <h2
-                    id={ariaLabelledBy || titleId.current}
-                    className="text-xl font-semibold text-slate-900 font-heading"
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-[var(--border)] flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <h2
+                  id={ariaLabelledBy || titleId.current}
+                  className="text-lg font-medium text-[var(--text)] leading-snug"
+                >
+                  {title}
+                </h2>
+                {description && (
+                  <p
+                    id={ariaDescribedBy || descriptionId.current}
+                    className="mt-1 text-sm text-[var(--text-muted)]"
                   >
-                    {title}
-                  </h2>
-                  {description && (
-                    <p
-                      id={ariaDescribedBy || descriptionId.current}
-                      className="mt-1 text-sm text-slate-600"
-                    >
-                      {description}
-                    </p>
-                  )}
-                </div>
-
-                {showCloseButton && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onClose}
-                    aria-label="Close modal"
-                    className="shrink-0"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </Button>
+                    {description}
+                  </p>
                 )}
               </div>
+              {showCloseButton && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClose}
+                  aria-label="Close modal"
+                  className="shrink-0 -mr-1 -mt-0.5"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </Button>
+              )}
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 py-4">
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto px-5 py-4">
               {children}
             </div>
 
+            {/* Footer */}
             {footer && (
-              <div className="px-6 py-4 border-t border-slate-200 bg-slate-50">
+              <div className="px-5 py-3 border-t border-[var(--border)] bg-[var(--surface-2)]">
                 {footer}
               </div>
             )}

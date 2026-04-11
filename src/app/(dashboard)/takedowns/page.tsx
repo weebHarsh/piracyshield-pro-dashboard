@@ -1,56 +1,63 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { Table, Column } from '@/components/table';
-import { Button } from '@/components/ui';
-import { Modal } from '@/components/ui';
+import { Button, Modal } from '@/components/ui';
+import { Badge } from '@/components/ui/Badge';
 import { SkeletonTable } from '@/components/ui/Skeleton';
 import { useTakedowns } from '@/lib/hooks';
+import { resolveStatusKey } from '@/lib/status';
 import type { Takedown } from '@/types';
+
+const selectClass = [
+  'px-3 py-1.5 rounded-lg text-sm',
+  'bg-[var(--surface-2)] border border-[var(--border)]',
+  'text-[var(--text)]',
+  'focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)]',
+].join(' ');
 
 const mockTakedowns: Takedown[] = [
   {
     id: 'tk-001',
-    incidentId: '1',
+    incidentId: 'INC-0041',
     userId: 'user-1',
-    platform: 'Netflix',
+    platform: 'Other',
     status: 'Completed',
-    submittedAt: '2025-04-01T10:30:00Z',
-    completedAt: '2025-04-02T14:00:00Z',
-    reason: 'Copyright infringement - CAM recording',
-    notes: 'Successfully removed from platform within 24 hours',
+    submittedAt: '2026-04-01T10:30:00Z',
+    completedAt: '2026-04-02T14:00:00Z',
+    reason: 'Pre-release leak — Studio Alpha S02E04',
+    notes: 'Removed within 27 hours of submission.',
   },
   {
     id: 'tk-002',
-    incidentId: '2',
+    incidentId: 'INC-0039',
     userId: 'user-1',
-    platform: 'YouTube',
+    platform: 'Other',
     status: 'Submitted',
-    submittedAt: '2025-04-02T14:20:00Z',
-    reason: 'Music album copyright violation',
-    notes: 'Awaiting platform response',
+    submittedAt: '2026-04-02T14:20:00Z',
+    reason: 'Project Helios OST — full album, no license',
+    notes: 'Awaiting platform acknowledgment.',
   },
   {
     id: 'tk-003',
-    incidentId: '3',
+    incidentId: 'INC-0038',
     userId: 'user-1',
-    platform: 'Twitter',
+    platform: 'Other',
     status: 'Pending',
-    submittedAt: '2025-04-03T09:15:00Z',
-    reason: 'Software crack distribution',
-    notes: 'Processing DMCA request',
+    submittedAt: '2026-04-03T09:15:00Z',
+    reason: 'Meridian Suite installer — crack distribution',
+    notes: 'DMCA request being processed.',
   },
   {
     id: 'tk-004',
-    incidentId: '4',
+    incidentId: 'INC-0035',
     userId: 'user-1',
-    platform: 'Facebook',
+    platform: 'Other',
     status: 'Approved',
-    submittedAt: '2025-04-04T16:45:00Z',
-    reason: 'Movie piracy - high quality rip',
-    notes: 'Takedown approved by platform',
+    submittedAt: '2026-04-04T16:45:00Z',
+    reason: 'Studio Alpha S01E08 — 2160p rip, wide distribution',
+    notes: 'Takedown approved. Awaiting de-index confirmation.',
   },
 ];
 
@@ -60,46 +67,42 @@ const takedownColumns: Column<Takedown>[] = [
     header: 'ID',
     sortable: true,
     accessor: (item) => (
-      <span className="font-mono text-sm text-slate-900">{item.id}</span>
+      <span className="tabular text-sm text-[var(--text-muted)]">{item.id}</span>
     ),
   },
   {
     key: 'platform',
     header: 'Platform',
     sortable: true,
+    accessor: (item) => (
+      <span className="text-sm text-[var(--text)]">{item.platform}</span>
+    ),
   },
   {
     key: 'reason',
     header: 'Reason',
-    sortable: false,
     accessor: (item) => (
-      <span className="text-sm text-slate-700 line-clamp-2">{item.reason}</span>
+      <span className="text-sm text-[var(--text-muted)] line-clamp-1">{item.reason}</span>
     ),
   },
   {
     key: 'status',
     header: 'Status',
     sortable: true,
-    accessor: (item) => {
-      const colors = {
-        Pending: 'bg-yellow-100 text-yellow-800',
-        Submitted: 'bg-blue-100 text-blue-800',
-        Approved: 'bg-purple-100 text-purple-800',
-        Rejected: 'bg-red-100 text-red-800',
-        Completed: 'bg-green-100 text-green-800',
-      };
-      return (
-        <span className={`px-2 py-1 rounded text-xs font-medium ${colors[item.status]}`}>
-          {item.status}
-        </span>
-      );
-    },
+    accessor: (item) => (
+      <Badge status={resolveStatusKey(item.status)} label={item.status} />
+    ),
   },
   {
     key: 'submittedAt',
     header: 'Submitted',
     sortable: true,
-    accessor: (item) => new Date(item.submittedAt).toLocaleDateString(),
+    type: 'number',
+    accessor: (item) => (
+      <span className="tabular text-sm text-[var(--text-muted)]">
+        {new Date(item.submittedAt).toLocaleDateString()}
+      </span>
+    ),
   },
 ];
 
@@ -110,41 +113,29 @@ export default function TakedownsPage() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     platform: '',
     reason: '',
     notes: '',
   });
 
-  const filteredTakedowns = mockTakedowns.filter(takedown => {
-    if (filterStatus !== 'all' && takedown.status !== filterStatus) return false;
-    return true;
-  });
+  const filteredTakedowns = mockTakedowns.filter((t) =>
+    filterStatus === 'all' || t.status === filterStatus
+  );
 
   const handleRowClick = (takedown: Takedown) => {
     setSelectedTakedown(takedown);
     setIsDetailModalOpen(true);
   };
 
-  const handleRowSelect = (ids: Set<string>) => {
-    setSelectedRows(ids);
-  };
-
   const handleCreateTakedown = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!formData.platform || !formData.reason) {
-      toast.error('Please fill in all required fields');
+      toast.error('Platform and reason are required');
       return;
     }
-    
-    const success = await createTakedown({
-      platform: formData.platform,
-      reason: formData.reason,
-      notes: formData.notes,
-    });
-    
+    const success = await createTakedown({ platform: formData.platform, reason: formData.reason, notes: formData.notes });
     if (success) {
       setIsCreateModalOpen(false);
       setFormData({ platform: '', reason: '', notes: '' });
@@ -152,131 +143,113 @@ export default function TakedownsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 font-heading">Takedowns</h1>
-            <p className="text-slate-600 mt-1">Track and manage content takedown requests</p>
-          </div>
-          <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
-            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+    <div className="space-y-4">
+      {/* Page header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-[var(--text-2xl)] font-medium text-[var(--text)]">Takedowns</h1>
+          <p className="text-sm text-[var(--text-muted)] mt-0.5">Track and manage DMCA takedown requests</p>
+        </div>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setIsCreateModalOpen(true)}
+          leftIcon={
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            New Takedown
-          </Button>
+          }
+        >
+          New Takedown
+        </Button>
+      </div>
+
+      {/* Table */}
+      <div className="surface-flat rounded-lg p-4">
+        <div className="flex items-center gap-3 mb-4">
+          <label htmlFor="status-filter" className="sr-only">Filter by status</label>
+          <select
+            id="status-filter"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className={selectClass}
+          >
+            <option value="all">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Submitted">Submitted</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Completed">Completed</option>
+          </select>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="flex-1">
-              <label htmlFor="status-filter" className="sr-only">Filter by status</label>
-              <select
-                id="status-filter"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
-              >
-                <option value="all">All Status</option>
-                <option value="Pending">Pending</option>
-                <option value="Submitted">Submitted</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
-          </div>
-
-          {isLoading ? (
-            <SkeletonTable rows={5} />
-          ) : (
-            <Table
-              data={filteredTakedowns}
-              columns={takedownColumns}
-              searchable
-              searchPlaceholder="Search takedowns..."
-              selectable
-              onRowSelect={handleRowSelect}
-              getRowId={(row) => row.id}
-              onRowClick={handleRowClick}
-              emptyMessage="No takedown requests found"
-              aria-label="Takedowns table"
-            />
-          )}
-        </div>
-      </motion.div>
+        {isLoading ? (
+          <SkeletonTable rows={8} />
+        ) : (
+          <Table
+            data={filteredTakedowns}
+            columns={takedownColumns}
+            searchable
+            searchPlaceholder="Search takedowns..."
+            selectable
+            onRowSelect={setSelectedRows}
+            getRowId={(row) => row.id}
+            onRowClick={handleRowClick}
+            emptyMessage="No takedown requests match the current filter"
+            pageSize={15}
+            aria-label="Takedowns table"
+          />
+        )}
+      </div>
 
       {/* Detail Modal */}
       <Modal
         isOpen={isDetailModalOpen}
-        onClose={() => {
-          setIsDetailModalOpen(false);
-          setSelectedTakedown(null);
-        }}
+        onClose={() => { setIsDetailModalOpen(false); setSelectedTakedown(null); }}
         title="Takedown Details"
-        description={`Viewing takedown request ${selectedTakedown?.id}`}
+        description={selectedTakedown ? `${selectedTakedown.id} · ${selectedTakedown.platform}` : undefined}
         size="lg"
+        footer={
+          <div className="flex justify-end">
+            <Button variant="ghost" size="sm"
+              onClick={() => { setIsDetailModalOpen(false); setSelectedTakedown(null); }}>
+              Close
+            </Button>
+          </div>
+        }
       >
         {selectedTakedown && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <label className="text-sm font-medium text-slate-600">Platform</label>
-                <p className="mt-1 text-slate-900">{selectedTakedown.platform}</p>
+                <p className="text-xs text-[var(--text-subtle)] mb-1">Platform</p>
+                <p className="text-[var(--text)]">{selectedTakedown.platform}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-slate-600">Status</label>
-                <p className="mt-1">
-                  <span className={`px-2 py-1 rounded text-sm font-medium ${
-                    selectedTakedown.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                    selectedTakedown.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                    selectedTakedown.status === 'Submitted' ? 'bg-blue-100 text-blue-800' :
-                    selectedTakedown.status === 'Approved' ? 'bg-purple-100 text-purple-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {selectedTakedown.status}
-                  </span>
-                </p>
+                <p className="text-xs text-[var(--text-subtle)] mb-1">Status</p>
+                <Badge status={resolveStatusKey(selectedTakedown.status)} label={selectedTakedown.status} />
               </div>
               <div>
-                <label className="text-sm font-medium text-slate-600">Submitted</label>
-                <p className="mt-1 text-slate-900">{new Date(selectedTakedown.submittedAt).toLocaleString()}</p>
+                <p className="text-xs text-[var(--text-subtle)] mb-1">Submitted</p>
+                <p className="tabular text-[var(--text)]">{new Date(selectedTakedown.submittedAt).toLocaleString()}</p>
               </div>
               {selectedTakedown.completedAt && (
                 <div>
-                  <label className="text-sm font-medium text-slate-600">Completed</label>
-                  <p className="mt-1 text-slate-900">{new Date(selectedTakedown.completedAt).toLocaleString()}</p>
+                  <p className="text-xs text-[var(--text-subtle)] mb-1">Completed</p>
+                  <p className="tabular text-[var(--text)]">{new Date(selectedTakedown.completedAt).toLocaleString()}</p>
                 </div>
               )}
             </div>
-
             <div>
-              <label className="text-sm font-medium text-slate-600">Reason</label>
-              <p className="mt-1 text-slate-900">{selectedTakedown.reason}</p>
+              <p className="text-xs text-[var(--text-subtle)] mb-1">Reason</p>
+              <p className="text-sm text-[var(--text)]">{selectedTakedown.reason}</p>
             </div>
-
             {selectedTakedown.notes && (
               <div>
-                <label className="text-sm font-medium text-slate-600">Notes</label>
-                <p className="mt-1 text-slate-900">{selectedTakedown.notes}</p>
+                <p className="text-xs text-[var(--text-subtle)] mb-1">Notes</p>
+                <p className="text-sm text-[var(--text-muted)]">{selectedTakedown.notes}</p>
               </div>
             )}
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
-              <button
-                onClick={() => {
-                  setIsDetailModalOpen(false);
-                  setSelectedTakedown(null);
-                }}
-                className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg"
-              >
-                Close
-              </button>
-            </div>
           </div>
         )}
       </Modal>
@@ -286,67 +259,45 @@ export default function TakedownsPage() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="New Takedown Request"
-        description="Submit a new content takedown request"
+        description="Submit a DMCA takedown request"
         size="md"
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="sm" type="button" onClick={() => setIsCreateModalOpen(false)}>Cancel</Button>
+            <Button variant="primary" size="sm" type="submit" form="create-takedown-form">Submit Request</Button>
+          </div>
+        }
       >
-        <form onSubmit={handleCreateTakedown} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="platform" className="block text-sm font-medium text-slate-700">
-              Platform <span className="text-red-500">*</span>
+        <form id="create-takedown-form" onSubmit={handleCreateTakedown} className="space-y-3">
+          <div>
+            <label htmlFor="td-platform" className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+              Platform <span className="text-[var(--status-critical)]">*</span>
             </label>
-            <select
-              id="platform"
-              value={formData.platform}
+            <select id="td-platform" value={formData.platform}
               onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-900"
-              required
-            >
+              className={`w-full ${selectClass}`} required>
               <option value="">Select platform</option>
-              <option value="Netflix">Netflix</option>
               <option value="YouTube">YouTube</option>
               <option value="Twitter">Twitter</option>
               <option value="Facebook">Facebook</option>
-              <option value="Instagram">Instagram</option>
               <option value="Other">Other</option>
             </select>
           </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="reason" className="block text-sm font-medium text-slate-700">
-              Reason <span className="text-red-500">*</span>
+          <div>
+            <label htmlFor="td-reason" className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+              Reason <span className="text-[var(--status-critical)]">*</span>
             </label>
-            <textarea
-              id="reason"
-              value={formData.reason}
+            <textarea id="td-reason" value={formData.reason}
               onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-900"
-              rows={3}
-              placeholder="Reason for takedown request..."
-              required
-            />
+              className={`w-full ${selectClass} resize-none`} rows={3}
+              placeholder="Describe the copyright violation..." required />
           </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="notes" className="block text-sm font-medium text-slate-700">
-              Notes (Optional)
-            </label>
-            <textarea
-              id="notes"
-              value={formData.notes}
+          <div>
+            <label htmlFor="td-notes" className="block text-xs font-medium text-[var(--text-muted)] mb-1">Notes</label>
+            <textarea id="td-notes" value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-900"
-              rows={2}
-              placeholder="Additional notes..."
-            />
-          </div>
-          
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)} type="button">
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Submit Request
-            </Button>
+              className={`w-full ${selectClass} resize-none`} rows={2}
+              placeholder="Additional context..." />
           </div>
         </form>
       </Modal>

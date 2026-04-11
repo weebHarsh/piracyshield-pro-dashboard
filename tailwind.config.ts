@@ -9,100 +9,80 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: "#f0fdfa",
-          100: "#ccfbf1",
-          200: "#99f6e4",
-          300: "#5eead4",
-          400: "#2dd4bf",
-          500: "#14b8a6",
-          600: "#0d9488",
-          700: "#0f766e",
-          800: "#115e59",
-          900: "#134e4a",
-        },
-        primary: {
-          teal: "#0f766e",
-          "teal-light": "#14b8a6",
-          "teal-lighter": "#5eead4",
-          "teal-dark": "#0d5e56",
-          "teal-darker": "#134e4a",
-        },
-        secondary: {
-          slate: "#475569",
-          "slate-light": "#64748b",
-          "slate-dark": "#334155",
-        },
-        accent: {
-          amber: "#f59e0b",
-          rose: "#e11d48",
-          emerald: "#10b981",
-        },
+        // Semantic tokens — map to CSS vars set in globals.css
+        bg:       "var(--bg)",
+        surface:  "var(--surface)",
+        "surface-2": "var(--surface-2)",
+        "surface-3": "var(--surface-3)",
+        border:   "var(--border)",
+        "border-strong": "var(--border-strong)",
+        text:     "var(--text)",
+        "text-muted":   "var(--text-muted)",
+        "text-subtle":  "var(--text-subtle)",
+        brand:    "var(--brand)",
+        "brand-strong": "var(--brand-strong)",
+        "brand-soft":   "var(--brand-soft)",
+        // Status — canonical five-tier palette
         status: {
-          critical: "#dc2626",
-          high: "#ea580c",
-          medium: "#d97706",
-          low: "#65a30d",
-          resolved: "#16a34a",
-        },
-        neutral: {
-          50: "#fafafa",
-          100: "#f5f5f5",
-          200: "#e5e5e5",
-          300: "#d4d4d4",
-          400: "#a3a3a3",
-          500: "#737373",
-          600: "#525252",
-          700: "#404040",
-          800: "#262626",
-          900: "#171717",
-        },
-        account: {
-          free: "#6b7280",
-          pro: "#0f766e",
-          enterprise: "#134e4a",
+          critical: "var(--status-critical)",
+          high:     "var(--status-high)",
+          medium:   "var(--status-medium)",
+          low:      "var(--status-low)",
+          info:     "var(--status-info)",
         },
       },
       fontFamily: {
-        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        heading: ["Poppins", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        sans:    ["PP Neue Montreal", "system-ui", "-apple-system", "sans-serif"],
+        display: ["PP Editorial New", "PP Neue Montreal", "system-ui", "sans-serif"],
+        mono:    ["PP Fraktion Mono", "ui-monospace", "Cascadia Code", "monospace"],
       },
       fontSize: {
-        h1: ["3.75rem", { lineHeight: "1.25", letterSpacing: "-0.02em" }],
-        h2: ["2.25rem", { lineHeight: "1.25", letterSpacing: "-0.02em" }],
-        h3: ["1.5rem", { lineHeight: "1.25", letterSpacing: "-0.02em" }],
-        h4: ["1.25rem", { lineHeight: "1.25", letterSpacing: "-0.02em" }],
-        h5: ["1.125rem", { lineHeight: "1.25", letterSpacing: "-0.02em" }],
-        h6: ["1rem", { lineHeight: "1.25", letterSpacing: "-0.02em" }],
+        // Dashboard fixed-rem scale
+        "3xl": ["1.875rem", { lineHeight: "1.25", letterSpacing: "-0.02em" }],
+        "2xl": ["1.5rem",   { lineHeight: "1.25", letterSpacing: "-0.02em" }],
+        xl:    ["1.25rem",  { lineHeight: "1.3",  letterSpacing: "-0.015em" }],
+        lg:    ["1.0625rem",{ lineHeight: "1.4",  letterSpacing: "-0.01em" }],
+        md:    ["0.9375rem",{ lineHeight: "1.55", letterSpacing: "-0.005em" }],
+        sm:    ["0.8125rem",{ lineHeight: "1.5",  letterSpacing: "0" }],
+        xs:    ["0.75rem",  { lineHeight: "1.5",  letterSpacing: "0" }],
       },
       spacing: {
-        0: "0",
-        1: "0.25rem",
-        2: "0.5rem",
-        3: "0.75rem",
-        4: "1rem",
-        5: "1.25rem",
-        6: "1.5rem",
-        8: "2rem",
-        10: "2.5rem",
-        12: "3rem",
-        16: "4rem",
-        20: "5rem",
-        24: "6rem",
+        // 4pt base scale
+        0:  "0",
+        1:  "0.25rem",  //  4px
+        1.5:"0.375rem", //  6px
+        2:  "0.5rem",   //  8px
+        3:  "0.75rem",  // 12px
+        4:  "1rem",     // 16px
+        5:  "1.25rem",  // 20px
+        6:  "1.5rem",   // 24px
+        8:  "2rem",     // 32px
+        10: "2.5rem",   // 40px
+        12: "3rem",     // 48px
+        16: "4rem",     // 64px
+        20: "5rem",     // 80px
+        24: "6rem",     // 96px
       },
       borderRadius: {
-        sm: "0.25rem",
-        md: "0.5rem",
-        lg: "0.75rem",
-        xl: "1rem",
-        "2xl": "1.5rem",
+        sm:  "0.1875rem", //  3px
+        md:  "0.375rem",  //  6px
+        lg:  "0.5rem",    //  8px
+        xl:  "0.75rem",   // 12px
+        "2xl": "1rem",    // 16px
         full: "9999px",
       },
-      backgroundImage: {
-        "teal-primary": "linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)",
-        "teal-soft": "linear-gradient(135deg, #14b8a6 0%, #5eead4 100%)",
-        "teal-dark": "linear-gradient(135deg, #134e4a 0%, #0f766e 100%)",
-        hero: "linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 50%, #ffffff 100%)",
+      transitionTimingFunction: {
+        "out-strong":    "cubic-bezier(0.23, 1, 0.32, 1)",
+        "out-quart":     "cubic-bezier(0.25, 1, 0.5, 1)",
+        "in-out-strong": "cubic-bezier(0.77, 0, 0.175, 1)",
+        "drawer":        "cubic-bezier(0.32, 0.72, 0, 1)",
+      },
+      transitionDuration: {
+        "press":   "160ms",
+        "ui-fast": "150ms",
+        "ui":      "200ms",
+        "enter":   "320ms",
+        "landing": "480ms",
       },
     },
   },

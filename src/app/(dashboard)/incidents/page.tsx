@@ -1,15 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { Table } from '@/components/table';
-import { Button, Input, TextArea } from '@/components/ui';
-import { Modal } from '@/components/ui';
+import { Button, Input, TextArea, Modal } from '@/components/ui';
+import { Badge } from '@/components/ui/Badge';
 import { SkeletonTable } from '@/components/ui/Skeleton';
 import { useIncidents } from '@/lib/hooks';
 import { mockIncidents, columns } from '@/lib/mockData';
+import { resolveStatusKey } from '@/lib/status';
 import type { Incident } from '@/types';
+
+const selectClass = [
+  'px-3 py-1.5 rounded-lg text-sm',
+  'bg-[var(--surface-2)] border border-[var(--border)]',
+  'text-[var(--text)]',
+  'focus:outline-none focus:border-[var(--brand)] focus:ring-1 focus:ring-[var(--brand)]',
+  'transition-colors duration-[var(--dur-ui-fast)]',
+].join(' ');
 
 export default function IncidentsPage() {
   const { incidents, createIncident, editIncident, initiateTakedown, bulkTakedown, isLoading, isSubmitting } = useIncidents();
@@ -21,7 +29,6 @@ export default function IncidentsPage() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterRisk, setFilterRisk] = useState<string>('all');
 
-  // Form state
   const [formData, setFormData] = useState({
     title: '',
     platform: '',
@@ -35,11 +42,7 @@ export default function IncidentsPage() {
     setIsDetailModalOpen(true);
   };
 
-  const handleRowSelect = (ids: Set<string>) => {
-    setSelectedRows(ids);
-  };
-
-  const filteredIncidents = mockIncidents.filter(incident => {
+  const filteredIncidents = mockIncidents.filter((incident) => {
     if (filterStatus !== 'all' && incident.status !== filterStatus) return false;
     if (filterRisk !== 'all' && incident.risk !== filterRisk) return false;
     return true;
@@ -47,12 +50,10 @@ export default function IncidentsPage() {
 
   const handleCreateIncident = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!formData.title || !formData.platform || !formData.type || !formData.url) {
       toast.error('Please fill in all required fields');
       return;
     }
-
     const success = await createIncident(formData);
     if (success) {
       setIsCreateModalOpen(false);
@@ -62,7 +63,6 @@ export default function IncidentsPage() {
 
   const handleInitiateTakedown = async () => {
     if (!selectedIncident) return;
-    
     const success = await initiateTakedown(selectedIncident.id);
     if (success) {
       setIsDetailModalOpen(false);
@@ -76,7 +76,7 @@ export default function IncidentsPage() {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = async (id: string, updates: any) => {
+  const handleSaveEdit = async (id: string, updates: Partial<Incident>) => {
     const success = await editIncident(id, updates);
     if (success) {
       setIsEditModalOpen(false);
@@ -87,181 +87,157 @@ export default function IncidentsPage() {
 
   const handleBulkTakedown = async () => {
     if (selectedRows.size === 0) {
-      toast.error('Please select at least one incident');
+      toast.error('Select at least one incident');
       return;
     }
-    
     const success = await bulkTakedown(Array.from(selectedRows));
-    if (success) {
-      setSelectedRows(new Set());
-    }
+    if (success) setSelectedRows(new Set());
   };
 
   return (
-    <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 font-heading">Incidents</h1>
-            <p className="text-slate-600 mt-1">Monitor and manage piracy incidents</p>
-          </div>
-          <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
-            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Report Incident
-          </Button>
+    <div className="space-y-4">
+      {/* Page header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-[var(--text-2xl)] font-medium text-[var(--text)]">Incidents</h1>
+          <p className="text-sm text-[var(--text-muted)] mt-0.5">Monitor and manage piracy incidents</p>
         </div>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setIsCreateModalOpen(true)}
+          leftIcon={
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          }
+        >
+          Report Incident
+        </Button>
+      </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="flex-1">
-              <label htmlFor="status-filter" className="sr-only">Filter by status</label>
-              <select
-                id="status-filter"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
-              >
-                <option value="all">All Status</option>
-                <option value="New">New</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Closed">Closed</option>
-              </select>
-            </div>
-            <div className="flex-1">
-              <label htmlFor="risk-filter" className="sr-only">Filter by risk</label>
-              <select
-                id="risk-filter"
-                value={filterRisk}
-                onChange={(e) => setFilterRisk(e.target.value)}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
-              >
-                <option value="all">All Risk Levels</option>
-                <option value="Critical">Critical</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
-              </select>
-            </div>
-            {selectedRows.size > 0 && (
-              <Button variant="danger" onClick={handleBulkTakedown} isLoading={isSubmitting}>
-                <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                </svg>
-                Bulk Takedown ({selectedRows.size})
-              </Button>
-            )}
+      {/* Table card */}
+      <div className="surface-flat rounded-lg p-4">
+        {/* Filters */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex-1">
+            <label htmlFor="status-filter" className="sr-only">Filter by status</label>
+            <select
+              id="status-filter"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className={selectClass}
+            >
+              <option value="all">All Status</option>
+              <option value="New">New</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Closed">Closed</option>
+            </select>
           </div>
-
-          {isLoading ? (
-            <SkeletonTable rows={5} />
-          ) : (
-            <Table
-              data={filteredIncidents}
-              columns={columns}
-              searchable
-              searchPlaceholder="Search incidents by title, platform, or type..."
-              selectable
-              onRowSelect={handleRowSelect}
-              getRowId={(row) => row.id}
-              onRowClick={handleRowClick}
-              emptyMessage="No incidents found matching your criteria"
-              aria-label="Incidents table"
-            />
+          <div className="flex-1">
+            <label htmlFor="risk-filter" className="sr-only">Filter by risk</label>
+            <select
+              id="risk-filter"
+              value={filterRisk}
+              onChange={(e) => setFilterRisk(e.target.value)}
+              className={selectClass}
+            >
+              <option value="all">All Risk Levels</option>
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          {selectedRows.size > 0 && (
+            <Button variant="danger" size="sm" onClick={handleBulkTakedown} isLoading={isSubmitting}>
+              Bulk Takedown ({selectedRows.size})
+            </Button>
           )}
         </div>
-      </motion.div>
+
+        {isLoading ? (
+          <SkeletonTable rows={8} />
+        ) : (
+          <Table
+            data={filteredIncidents}
+            columns={columns}
+            searchable
+            searchPlaceholder="Search incidents..."
+            selectable
+            onRowSelect={setSelectedRows}
+            getRowId={(row) => row.id}
+            onRowClick={handleRowClick}
+            emptyMessage="No incidents match the current filters"
+            pageSize={15}
+            aria-label="Incidents table"
+          />
+        )}
+      </div>
 
       {/* Detail Modal */}
       <Modal
         isOpen={isDetailModalOpen}
-        onClose={() => {
-          setIsDetailModalOpen(false);
-          setSelectedIncident(null);
-        }}
-        title={selectedIncident?.title || 'Incident Details'}
-        description={`Viewing details for incident ${selectedIncident?.id}`}
+        onClose={() => { setIsDetailModalOpen(false); setSelectedIncident(null); }}
+        title={selectedIncident?.title ?? 'Incident Details'}
+        description={selectedIncident ? `ID ${selectedIncident.id} · ${selectedIncident.platform}` : undefined}
         size="lg"
+        footer={
+          selectedIncident ? (
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" size="sm"
+                onClick={() => { setIsDetailModalOpen(false); setSelectedIncident(null); }}>
+                Close
+              </Button>
+              <Button variant="secondary" size="sm" onClick={handleEditIncident}>
+                Edit
+              </Button>
+              {selectedIncident.status !== 'Resolved' && (
+                <Button variant="primary" size="sm" onClick={handleInitiateTakedown} isLoading={isSubmitting}>
+                  Initiate Takedown
+                </Button>
+              )}
+            </div>
+          ) : undefined
+        }
       >
         {selectedIncident && (
           <div className="space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">{selectedIncident.title}</h3>
-                <p className="text-sm text-slate-600">{selectedIncident.platform} • {selectedIncident.type}</p>
-              </div>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                selectedIncident.risk === 'Critical' ? 'bg-red-100 text-red-800' :
-                selectedIncident.risk === 'High' ? 'bg-orange-100 text-orange-800' :
-                selectedIncident.risk === 'Medium' ? 'bg-amber-100 text-amber-800' :
-                'bg-green-100 text-green-800'
-              }`}>
-                {selectedIncident.risk}
-              </span>
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm text-[var(--text-muted)]">{selectedIncident.type}</p>
+              <Badge status={resolveStatusKey(selectedIncident.risk)} />
             </div>
-            
-            <div className="grid grid-cols-2 gap-4 text-sm">
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <p className="text-slate-600">Similarity</p>
-                <p className="font-medium text-slate-900">{selectedIncident.similarity}%</p>
+                <p className="text-xs text-[var(--text-subtle)] mb-1">Similarity</p>
+                <p className="tabular font-medium text-[var(--text)]">{selectedIncident.similarity}%</p>
               </div>
               <div>
-                <p className="text-slate-600">Status</p>
-                <p className="font-medium text-slate-900">{selectedIncident.status}</p>
+                <p className="text-xs text-[var(--text-subtle)] mb-1">Status</p>
+                <Badge status={resolveStatusKey(selectedIncident.status)} label={selectedIncident.status} />
               </div>
               <div>
-                <p className="text-slate-600">Date</p>
-                <p className="font-medium text-slate-900">{new Date(selectedIncident.date).toLocaleDateString()}</p>
+                <p className="text-xs text-[var(--text-subtle)] mb-1">Detected</p>
+                <p className="tabular text-[var(--text)]">{new Date(selectedIncident.date).toLocaleDateString()}</p>
               </div>
               <div>
-                <p className="text-slate-600">ID</p>
-                <p className="font-medium text-slate-900">{selectedIncident.id}</p>
+                <p className="text-xs text-[var(--text-subtle)] mb-1">ID</p>
+                <p className="tabular text-[var(--text)]">{selectedIncident.id}</p>
               </div>
             </div>
 
             <div>
-              <p className="text-slate-600 text-sm">URL</p>
+              <p className="text-xs text-[var(--text-subtle)] mb-1">URL</p>
               <a
                 href={selectedIncident.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-teal-600 hover:text-teal-700 underline text-sm break-all"
+                className="text-[var(--brand)] hover:text-[var(--brand-strong)] underline text-sm break-all"
               >
                 {selectedIncident.url}
               </a>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
-              <button
-                onClick={() => {
-                  setIsDetailModalOpen(false);
-                  setSelectedIncident(null);
-                }}
-                className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg"
-              >
-                Close
-              </button>
-              <button
-                onClick={handleEditIncident}
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
-              >
-                Edit
-              </button>
-              {selectedIncident.status !== 'Resolved' && (
-                <button
-                  onClick={handleInitiateTakedown}
-                  disabled={isSubmitting}
-                  className="px-4 py-2 text-sm font-medium text-white bg-teal-700 hover:bg-teal-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? 'Processing...' : 'Initiate Takedown'}
-                </button>
-              )}
             </div>
           </div>
         )}
@@ -272,32 +248,36 @@ export default function IncidentsPage() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Report New Incident"
-        description="Fill in the details to report a new piracy incident"
+        description="Fill in the details to log a new piracy incident"
         size="lg"
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="sm" type="button" onClick={() => setIsCreateModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="sm" type="submit" form="create-incident-form" isLoading={isSubmitting}>
+              Submit
+            </Button>
+          </div>
+        }
       >
-        <form onSubmit={handleCreateIncident} className="space-y-4">
+        <form id="create-incident-form" onSubmit={handleCreateIncident} className="space-y-3">
           <Input
             label="Title"
             id="incident-title"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             required
-            placeholder="Enter incident title"
+            placeholder="e.g. Studio Alpha — S02E04 leak"
           />
-
-          <div className="space-y-2">
-            <label htmlFor="platform" className="block text-sm font-medium text-slate-700">
-              Platform <span className="text-red-500">*</span>
+          <div>
+            <label htmlFor="platform" className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+              Platform <span className="text-[var(--status-critical)]">*</span>
             </label>
-            <select
-              id="platform"
-              value={formData.platform}
+            <select id="platform" value={formData.platform}
               onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-900"
-              required
-            >
+              className={`w-full ${selectClass}`} required>
               <option value="">Select platform</option>
-              <option value="Netflix">Netflix</option>
               <option value="YouTube">YouTube</option>
               <option value="Twitter">Twitter</option>
               <option value="Facebook">Facebook</option>
@@ -305,28 +285,21 @@ export default function IncidentsPage() {
               <option value="Other">Other</option>
             </select>
           </div>
-
-          <div className="space-y-2">
-            <label htmlFor="type" className="block text-sm font-medium text-slate-700">
-              Content Type <span className="text-red-500">*</span>
+          <div>
+            <label htmlFor="type" className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+              Content Type <span className="text-[var(--status-critical)]">*</span>
             </label>
-            <select
-              id="type"
-              value={formData.type}
+            <select id="type" value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-900"
-              required
-            >
+              className={`w-full ${selectClass}`} required>
               <option value="">Select type</option>
-              <option value="Movie">Movie</option>
+              <option value="Video">Video</option>
               <option value="Music">Music</option>
               <option value="Software">Software</option>
               <option value="Game">Game</option>
-              <option value="Book">Book</option>
               <option value="Other">Other</option>
             </select>
           </div>
-
           <Input
             label="URL"
             id="incident-url"
@@ -334,42 +307,43 @@ export default function IncidentsPage() {
             value={formData.url}
             onChange={(e) => setFormData({ ...formData, url: e.target.value })}
             required
-            placeholder="https://example.com/pirated-content"
+            placeholder="https://stream-vault-0412.net/..."
           />
-
           <TextArea
             label="Description"
             id="incident-description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Additional details about the incident..."
+            placeholder="Additional context..."
             rows={3}
           />
-
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)} type="button">
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit" isLoading={isSubmitting}>
-              Submit Incident
-            </Button>
-          </div>
         </form>
       </Modal>
 
       {/* Edit Incident Modal */}
       <Modal
         isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedIncident(null);
-        }}
+        onClose={() => { setIsEditModalOpen(false); setSelectedIncident(null); }}
         title="Edit Incident"
-        description={`Editing incident ${selectedIncident?.id}`}
+        description={selectedIncident ? `Editing ${selectedIncident.id}` : undefined}
         size="lg"
+        footer={
+          selectedIncident ? (
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" size="sm"
+                onClick={() => { setIsEditModalOpen(false); setSelectedIncident(null); }}>
+                Cancel
+              </Button>
+              <Button variant="primary" size="sm"
+                onClick={() => handleSaveEdit(selectedIncident.id, selectedIncident)}>
+                Save Changes
+              </Button>
+            </div>
+          ) : undefined
+        }
       >
         {selectedIncident && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Input
               label="Title"
               id="edit-title"
@@ -377,49 +351,31 @@ export default function IncidentsPage() {
               onChange={(e) => setSelectedIncident({ ...selectedIncident, title: e.target.value })}
               required
             />
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-700">Platform</label>
+            <div>
+              <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Platform</label>
               <select
                 value={selectedIncident.platform}
-                onChange={(e) => setSelectedIncident({ ...selectedIncident, platform: e.target.value as any })}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-900"
+                onChange={(e) => setSelectedIncident({ ...selectedIncident, platform: e.target.value as Incident['platform'] })}
+                className={`w-full ${selectClass}`}
               >
-                <option value="Netflix">Netflix</option>
                 <option value="YouTube">YouTube</option>
                 <option value="Twitter">Twitter</option>
                 <option value="Facebook">Facebook</option>
                 <option value="Instagram">Instagram</option>
               </select>
             </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-700">Status</label>
+            <div>
+              <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Status</label>
               <select
                 value={selectedIncident.status}
-                onChange={(e) => setSelectedIncident({ ...selectedIncident, status: e.target.value as any })}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-900"
+                onChange={(e) => setSelectedIncident({ ...selectedIncident, status: e.target.value as Incident['status'] })}
+                className={`w-full ${selectClass}`}
               >
                 <option value="New">New</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Resolved">Resolved</option>
                 <option value="Closed">Closed</option>
               </select>
-            </div>
-            <div className="flex justify-end gap-3 pt-4">
-              <button
-                onClick={() => {
-                  setIsEditModalOpen(false);
-                  setSelectedIncident(null);
-                }}
-                className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleSaveEdit(selectedIncident.id, selectedIncident)}
-                className="px-4 py-2 text-sm font-medium text-white bg-teal-700 hover:bg-teal-800 rounded-lg"
-              >
-                Save Changes
-              </button>
             </div>
           </div>
         )}

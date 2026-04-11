@@ -28,10 +28,10 @@ export default function DashboardLayout({
 
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-[var(--bg)]" data-surface="dashboard">
         <a
           href="#main-content"
-          className="skip-link sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-teal-700 focus:text-white focus:px-4 focus:py-2 focus:rounded-md"
+          className="skip-link sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50"
         >
           Skip to main content
         </a>
@@ -47,7 +47,7 @@ export default function DashboardLayout({
           <main
             id="main-content"
             role="main"
-            className="p-6"
+            className="p-4"
             tabIndex={-1}
           >
             <PageTransition>

@@ -123,7 +123,7 @@ export interface ScheduledScan {
 
 export interface KPIData {
   title: string;
-  value: number;
+  value: number | string;
   change: string;
   trend: 'up' | 'down' | 'neutral';
   icon: string;
