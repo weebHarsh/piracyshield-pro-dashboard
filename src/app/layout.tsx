@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Bodoni_Mada, Onest, JetBrains_Mono } from "next/font/google";
+import { Bodoni_Moda, Onest, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 // Display — editorial confidence for landing H1/H2
-const bodoniMada = Bodoni_Mada({
+const bodoniModa = Bodoni_Moda({
   subsets: ["latin"],
-  weight: ["200", "300"],
+  weight: ["400", "500"],
   style: ["normal", "italic"],
   display: "swap",
   variable: "--font-display-loaded",
@@ -55,7 +55,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${bodoniMada.variable} ${onest.variable} ${jetbrainsMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${bodoniModa.variable} ${onest.variable} ${jetbrainsMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <a href="#main-content" className="skip-link">
           Skip to main content
