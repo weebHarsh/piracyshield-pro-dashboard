@@ -178,9 +178,10 @@
   --color-brand-strong:  var(--brand-strong);
   --color-brand-soft:    var(--brand-soft);
 
-  --font-sans:     "PP Neue Montreal", system-ui, -apple-system, sans-serif;
-  --font-display:  "PP Editorial New", "PP Neue Montreal", system-ui, sans-serif;
-  --font-mono:     "PP Fraktion Mono", ui-monospace, "Cascadia Code", monospace;
+  /* Google Fonts — loaded via next/font/google in layout.tsx */
+  --font-sans:    var(--font-sans-loaded, "Onest"), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-display-loaded, "Bodoni Mada"), var(--font-sans-loaded, "Onest"), system-ui, sans-serif;
+  --font-mono:    var(--font-mono-loaded, "JetBrains Mono"), ui-monospace, monospace;
 }
 
 /* ─── Base ──────────────────────────────────────────────────────────────── */
@@ -190,7 +191,7 @@ html {
 }
 
 body {
-  font-family: "PP Neue Montreal", system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   font-size: var(--text-md);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;

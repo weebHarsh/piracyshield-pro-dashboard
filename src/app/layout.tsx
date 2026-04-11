@@ -1,5 +1,31 @@
 import type { Metadata } from "next";
+import { Bodoni_Mada, Onest, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+
+// Display — editorial confidence for landing H1/H2
+const bodoniMada = Bodoni_Mada({
+  subsets: ["latin"],
+  weight: ["200", "300"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-display-loaded",
+});
+
+// Body/UI — confident, mechanical geometric sans
+const onest = Onest({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
+  display: "swap",
+  variable: "--font-sans-loaded",
+});
+
+// Mono — tabular figures for every number, KPI, chart label
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+  variable: "--font-mono-loaded",
+});
 
 export const metadata: Metadata = {
   title: "PiracyShield Pro - Content Protection Dashboard",
@@ -29,7 +55,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className={`${bodoniMada.variable} ${onest.variable} ${jetbrainsMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <a href="#main-content" className="skip-link">
           Skip to main content
